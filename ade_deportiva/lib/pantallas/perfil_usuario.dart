@@ -24,7 +24,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   /// 🔥 OBTENER DATOS REALES
   Future<void> obtenerDatos() async {
-    var url = Uri.parse("https://escuela-api.onrender.com/usuario");
+    var url = Uri.parse("https://escuela-deportiva-project.onrender.com/usuario");
 
     try {
       var response = await http.post(
@@ -156,7 +156,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                   confirmarController.text &&
                               nuevaController.text.isNotEmpty) {
                             var url = Uri.parse(
-                              "https://escuela-api.onrender.com/usuario/password",
+                              "https://escuela-deportiva-project.onrender.com/usuario/password",
                             );
 
                             await http.put(
@@ -258,7 +258,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                   onPressed: () async {
                     try {
                       var url = Uri.parse(
-                        "https://escuela-api.onrender.com/usuarios/${widget.idUsuario}",
+                        "https://escuela-deportiva-project.onrender.com/usuarios/${widget.idUsuario}",
                       );
 
                       var response = await http.delete(url);

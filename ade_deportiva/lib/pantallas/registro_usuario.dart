@@ -36,7 +36,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
       return;
     }
 
-    var url = Uri.parse("https://escuela-api.onrender.com/usuarios");
+    var url = Uri.parse("https://escuela-deportiva-project.onrender.com/usuarios");
 
     try {
       var response = await http.post(
