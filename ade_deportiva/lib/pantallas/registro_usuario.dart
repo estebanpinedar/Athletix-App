@@ -36,7 +36,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
       return;
     }
 
-    var url = Uri.parse("http://192.168.101.3:3000/usuarios");
+    var url = Uri.parse("https://escuela-api.onrender.com/usuarios");
 
     try {
       var response = await http.post(

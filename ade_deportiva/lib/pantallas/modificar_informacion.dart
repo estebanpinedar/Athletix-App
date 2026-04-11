@@ -38,7 +38,7 @@ class _ModificarInformacionUsuarioState
 
   Future<void> actualizarUsuario() async {
     var url = Uri.parse(
-      "http://192.168.101.3:3000/usuarios/${widget.idUsuario}",
+      "https://escuela-api.onrender.com/usuarios/${widget.idUsuario}",
     );
 
     var response = await http.put(
