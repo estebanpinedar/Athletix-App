@@ -12,7 +12,7 @@ class IniciarSesion extends StatelessWidget {
 
   /// 🔐 FUNCIÓN LOGIN
   Future<void> login(BuildContext context) async {
-  var url = Uri.parse("http://192.168.101.3:3000/login");
+  var url = Uri.parse("https://escuela-api.onrender.com/login");
 
   try {
     var response = await http.post(
