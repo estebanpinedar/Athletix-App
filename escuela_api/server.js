@@ -407,6 +407,25 @@ app.put("/espacios/:id", async (req, res) => {
   }
 });
 
+// ELIMINAR ESPACIO
+app.delete("/espacios/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.execute({
+      sql: "DELETE FROM espacios WHERE id_espacio = ?",
+      args: [id],
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================

@@ -51,6 +51,94 @@ class _GestionEspaciosState extends State<GestionEspacios> {
     }
   }
 
+  ///ELIMINAR ESPACIO
+  Future<void> eliminarEspacio(int idEspacio) async {
+    try {
+      var url = Uri.parse("https://escuela-deportiva-project.onrender.com/espacios/$idEspacio");
+
+      var response = await http.delete(url);
+
+      var data = json.decode(response.body);
+
+      if (data["success"] == true) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Espacio eliminado")));
+
+        obtenerEspacios(); // 🔥 recargar lista
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Error al eliminar")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  ///NODAL CONFIRMAR ELINACION DE ESPACIO
+  void mostrarDialogoEliminar(int idEspacio) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "¿Está seguro que quiere eliminar este espacio?",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// BOTÓN CONFIRMAR
+              SizedBox(
+                width: 220,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    eliminarEspacio(idEspacio); // 🔥 ELIMINA REAL
+                  },
+                  child: const Text(
+                    "Confirmar",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// BOTÓN CANCELAR
+              SizedBox(
+                width: 150,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancelar"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   /// 🔍 BUSCADOR
   void filtrar(String texto) {
     setState(() {
@@ -139,25 +227,21 @@ class _GestionEspaciosState extends State<GestionEspacios> {
                               subtitle: Text(espacio["descripcion"] ?? ""),
 
                               /// 🔥 MENÚ 3 PUNTOS
-                              trailing: PopupMenuButton(
+                              trailing: PopupMenuButton<String>(
                                 onSelected: (value) {
                                   if (value == "modificar") {
-                                    Navigator.push(
+                                    navegarRapido(
                                       context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ModificarEspacio(
-                                          idEspacio: espacio["id_espacio"],
-                                          idUsuario: widget.idUsuario,
-                                          nombre: espacio["nombre"],
-                                          descripcion: espacio["descripcion"],
-                                          idDeporte: espacio["id_deporte"],
-                                        ),
+                                      ModificarEspacio(
+                                        idUsuario: widget.idUsuario,
+                                        idEspacio: espacio["id_espacio"],
+                                        nombre: espacio["nombre"],
+                                        descripcion: espacio["descripcion"],
+                                        idDeporte: espacio["id_deporte"],
                                       ),
-                                    ).then((value) {
-                                      if (value == true) {
-                                        obtenerEspacios(); // 🔥 refresca lista
-                                      }
-                                    });
+                                    );
+                                  } else if (value == "eliminar") {
+                                    mostrarDialogoEliminar(espacio["id_espacio"]); // 🔥 AQUÍ
                                   }
                                 },
                                 itemBuilder: (context) => const [
