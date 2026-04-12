@@ -42,8 +42,10 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     var res = await http.get(Uri.parse("$api/deportes"));
     var data = json.decode(res.body);
 
+    print("RESPUESTA: $data"); // 🔥 debug
+
     setState(() {
-      deportes = data;
+      deportes = data["deportes"]; // 🔥 CORRECTO
     });
   }
 
@@ -160,26 +162,13 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               DropdownButtonFormField<int>(
                 value: idDeporte,
                 hint: const Text("Seleccionar deporte"),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade200,
-                  prefixIcon: const Icon(
-                    Icons.sports_soccer,
-                    color: Colors.blue,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
                 items: deportes.map<DropdownMenuItem<int>>((d) {
                   return DropdownMenuItem<int>(
-                    value: int.parse(d["id_deporte"].toString()), // 🔥 FIX
+                    value: d["id_deporte"],
                     child: Text(d["nombre"]),
                   );
                 }).toList(),
                 onChanged: (value) {
-                  print("Seleccionado: $value"); // 🔥 DEBUG
-
                   setState(() {
                     idDeporte = value;
                     idEspacio = null;
