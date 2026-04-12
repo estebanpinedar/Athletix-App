@@ -461,17 +461,29 @@ app.delete("/espacios/:id", async (req, res) => {
 app.get("/espacios/deporte/:id", async (req, res) => {
   const { id } = req.params;
 
-  const result = await db.execute({
-    sql: `
-      SELECT e.id_espacio, e.nombre, u.nombre as entrenador
-      FROM espacios e
-      JOIN usuarios u ON e.id_entrenador = u.id_usuario
-      WHERE e.id_deporte = ?
-    `,
-    args: [id],
-  });
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT 
+          e.id_espacio, 
+          e.nombre, 
+          u.nombre as entrenador
+        FROM espacios e
+        JOIN entrenadores en ON e.id_entrenador = en.id_entrenador
+        JOIN usuarios u ON en.id_usuario = u.id_usuario
+        WHERE e.id_deporte = ?
+      `,
+      args: [id],
+    });
 
-  res.json(result.rows);
+    res.json(result.rows);
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 });
 
 //GUARDAR ENTRENAMIENTO
