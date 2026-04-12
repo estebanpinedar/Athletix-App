@@ -426,6 +426,48 @@ app.delete("/espacios/:id", async (req, res) => {
   }
 });
 
+//OBTENER DEPORTES
+app.get("/deportes", async (req, res) => {
+  const result = await db.execute("SELECT * FROM deportes");
+  res.json(result.rows);
+});
+
+//ESPACIOS POR DEPORTE (CON ENTRENADOR)
+app.get("/espacios/deporte/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const result = await db.execute({
+    sql: `
+      SELECT e.id_espacio, e.nombre, u.nombre as entrenador
+      FROM espacios e
+      JOIN usuarios u ON e.id_entrenador = u.id_usuario
+      WHERE e.id_deporte = ?
+    `,
+    args: [id],
+  });
+
+  res.json(result.rows);
+});
+
+//GUARDAR ENTRENAMIENTO
+app.post("/entrenamientos", async (req, res) => {
+  const { id_deporte, id_espacio, id_entrenador, fecha, hora } = req.body;
+
+  try {
+    await db.execute({
+      sql: `
+        INSERT INTO entrenamientos (id_deporte, id_espacio, id_entrenador, fecha, hora)
+        VALUES (?, ?, ?, ?, ?)
+      `,
+      args: [id_deporte, id_espacio, id_entrenador, fecha, hora],
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================

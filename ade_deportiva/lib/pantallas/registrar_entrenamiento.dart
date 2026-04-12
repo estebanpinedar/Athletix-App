@@ -1,46 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegistrarEntrenamiento extends StatefulWidget {
-  const RegistrarEntrenamiento({super.key, required int idUsuario, required String nombreCompleto, required String rol});
+  final int idUsuario;
+  final String nombreCompleto;
+  final String rol;
+
+  const RegistrarEntrenamiento({
+    super.key,
+    required this.idUsuario,
+    required this.nombreCompleto,
+    required this.rol,
+  });
 
   @override
-  State<RegistrarEntrenamiento> createState() => _RegistrarEntrenamientoState();
+  State<RegistrarEntrenamiento> createState() =>
+      _RegistrarEntrenamientoState();
 }
 
 class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
-  String? deporteSeleccionado;
+  int? idDeporte;
+  int? idEspacio;
+
   DateTime? fechaSeleccionada;
   TimeOfDay? horaSeleccionada;
 
-  final List<String> deportes = [
-    "Atletismo",
-    "Baloncesto",
-    "Fútbol",
-    "Natación",
-    "Voleibol",
-  ];
+  List deportes = [];
+  List espacios = [];
 
-  Future<void> _seleccionarFecha(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+  final String api = "https://escuela-deportiva-project.onrender.com"; // 🔥 CAMBIA
+
+  @override
+  void initState() {
+    super.initState();
+    obtenerDeportes();
+  }
+
+  /// 🔥 OBTENER DEPORTES
+  Future<void> obtenerDeportes() async {
+    var res = await http.get(Uri.parse("$api/deportes"));
+    var data = json.decode(res.body);
+
+    setState(() {
+      deportes = data;
+    });
+  }
+
+  /// 🔥 OBTENER ESPACIOS POR DEPORTE
+  Future<void> obtenerEspacios(int idDep) async {
+    var res = await http.get(Uri.parse("$api/espacios/deporte/$idDep"));
+    var data = json.decode(res.body);
+
+    setState(() {
+      espacios = data;
+    });
+  }
+
+  /// 🔥 GUARDAR ENTRENAMIENTO
+  Future<void> guardar() async {
+    if (idDeporte == null ||
+        idEspacio == null ||
+        fechaSeleccionada == null ||
+        horaSeleccionada == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Completa todos los campos")),
+      );
+      return;
+    }
+
+    var res = await http.post(
+      Uri.parse("$api/entrenamientos"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id_deporte": idDeporte,
+        "id_espacio": idEspacio,
+        "id_entrenador": widget.idUsuario,
+        "fecha": fechaSeleccionada.toString().split(" ")[0],
+        "hora":
+            "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
+      }),
     );
-    if (picked != null) {
-      setState(() {
-        fechaSeleccionada = picked;
-      });
+
+    var data = json.decode(res.body);
+
+    if (data["success"]) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Entrenamiento registrado")),
+      );
+      Navigator.pop(context);
     }
   }
 
-  Future<void> _seleccionarHora(BuildContext context) async {
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+  /// 🎨 FECHA BONITA
+  String formatoFecha() {
+    if (fechaSeleccionada == null) return "Seleccionar fecha";
+    return "${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}";
+  }
+
+  /// 🎨 HORA BONITA
+  String formatoHora() {
+    if (horaSeleccionada == null) return "Seleccionar hora";
+    return "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}";
+  }
+
+  Future<void> seleccionarFecha() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
     if (picked != null) {
-      setState(() {
-        horaSeleccionada = picked;
-      });
+      setState(() => fechaSeleccionada = picked);
+    }
+  }
+
+  Future<void> seleccionarHora() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (picked != null) {
+      setState(() => horaSeleccionada = picked);
     }
   }
 
@@ -53,152 +147,141 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              /// LOGO
-              Center(child: Image.asset("assets/images/logo.png", height: 160)),
+
+              Image.asset("assets/images/logo.png", height: 140),
+
               const SizedBox(height: 10),
 
-              /// TÍTULO
               const Text(
                 "Nuevo Entrenamiento",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 30),
 
-              /// CAMPO DEPORTE
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
+              const SizedBox(height: 25),
+
+              /// 🔥 DEPORTE
+              DropdownButtonFormField<int>(
+                value: idDeporte,
+                hint: const Text("Seleccionar deporte"),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade200,
+                  prefixIcon: const Icon(Icons.sports),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.sports_soccer, color: Colors.blue),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          labelText: "Seleccionar deporte",
-                        ),
-                        value: deporteSeleccionado,
-                        items: deportes
-                            .map((d) =>
-                                DropdownMenuItem(value: d, child: Text(d)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            deporteSeleccionado = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                items: deportes.map<DropdownMenuItem<int>>((d) {
+                  return DropdownMenuItem(
+                    value: d["id_deporte"],
+                    child: Text(d["nombre"]),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    idDeporte = value;
+                    idEspacio = null;
+                    espacios = [];
+                  });
+
+                  obtenerEspacios(value!);
+                },
               ),
+
               const SizedBox(height: 20),
 
-              /// CAMPO FECHA
+              /// 🔥 ESPACIO (DINÁMICO)
+              if (idDeporte != null)
+                DropdownButtonFormField<int>(
+                  value: idEspacio,
+                  hint: const Text("Seleccionar espacio"),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey.shade200,
+                    prefixIcon: const Icon(Icons.location_on),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  items: espacios.map<DropdownMenuItem<int>>((e) {
+                    return DropdownMenuItem(
+                      value: e["id_espacio"],
+                      child: Text(
+                          "${e["nombre"]} - ${e["entrenador"]}"),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      idEspacio = value;
+                    });
+                  },
+                ),
+
+              const SizedBox(height: 20),
+
+              /// 🔥 FECHA (MEJORADA)
               GestureDetector(
-                onTap: () => _seleccionarFecha(context),
+                onTap: seleccionarFecha,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.calendar_today, color: Colors.blue),
                       const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          fechaSeleccionada == null
-                              ? "Seleccionar fecha"
-                              : "${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}",
-                        ),
-                      ),
+                      Text(formatoFecha()),
                     ],
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
-              /// CAMPO HORA
+              /// 🔥 HORA (MEJORADA)
               GestureDetector(
-                onTap: () => _seleccionarHora(context),
+                onTap: seleccionarHora,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.access_time, color: Colors.blue),
                       const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          horaSeleccionada == null
-                              ? "Seleccionar hora"
-                              : "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
-                        ),
-                      ),
+                      Text(formatoHora()),
                     ],
                   ),
                 ),
               ),
+
               const SizedBox(height: 30),
 
-              /// BOTÓN CONFIRMAR (grande, negro)
+              /// 🔥 BOTÓN
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Entrenamiento confirmado")),
-                    );
-                  },
+                  onPressed: guardar,
                   child: const Text(
                     "Confirmar",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
 
-              /// BOTÓN CANCELAR (más pequeño, casi blanco con contorno)
-              SizedBox(
-                width: 150,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade100,
-                    side: BorderSide(color: Colors.grey.shade400),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context); // vuelve a la ventana anterior
-                  },
-                  child: const Text(
-                    "Cancelar",
-                    style: TextStyle(color: Colors.black, fontSize: 14),
-                  ),
-                ),
+              const SizedBox(height: 10),
+
+              OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancelar"),
               ),
             ],
           ),
