@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Resumen extends StatefulWidget {
-  const Resumen({super.key, required int idUsuario, required String nombreCompleto});
+  const Resumen({super.key, required int idUsuario, required String nombreCompleto, required String rol});
 
   @override
   State<Resumen> createState() => _ResumenState();

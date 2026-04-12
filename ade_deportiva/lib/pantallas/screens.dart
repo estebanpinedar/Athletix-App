@@ -13,3 +13,5 @@ export 'principal_widget.dart';
 export 'registro_usuario.dart';
 export 'drawer_menu.dart';
 export 'modificar_informacion.dart';
+export 'ver_entrenamientos_entrenador.dart';
+export 'gestion_espacios.dart';

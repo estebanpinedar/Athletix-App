@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RegistrarEntrenamiento extends StatefulWidget {
-  const RegistrarEntrenamiento({super.key, required int idUsuario, required String nombreCompleto});
+  const RegistrarEntrenamiento({super.key, required int idUsuario, required String nombreCompleto, required String rol});
 
   @override
   State<RegistrarEntrenamiento> createState() => _RegistrarEntrenamientoState();

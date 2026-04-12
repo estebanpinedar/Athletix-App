@@ -4,11 +4,13 @@ import 'screens.dart';
 class NotificacionesUsuario extends StatefulWidget {
   final int idUsuario;
   final String nombreCompleto;
+  final String rol;
 
   const NotificacionesUsuario({
     super.key,
     required this.idUsuario,
-    required this.nombreCompleto
+    required this.nombreCompleto,
+    required this.rol,
   });
 
   @override
@@ -24,7 +26,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         InicioUsuario(
           nombreCompleto: widget.nombreCompleto,
-          idUsuario: widget.idUsuario, rol: '',
+          idUsuario: widget.idUsuario, rol: widget.rol,
         ),
       );
     } else if (index == 1) {
@@ -32,14 +34,14 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         CalendarioUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto,
+          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
         ),
       );
     } else if (index == 2) {
       navegarRapido(
         context,
         RegistrarEntrenamiento(
-          idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,
+          idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,
         ),
       );
     } else if (index == 4) {
@@ -47,7 +49,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         PerfilUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto,
+          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
         ),
       );
     }
@@ -63,7 +65,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
       backgroundColor: const Color(0xFFE8EEF2),
 
       /// DRAWER
-      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
 
       body: SafeArea(
         child: Column(
@@ -90,7 +92,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                         context,
                         PerfilUsuario(
                           idUsuario: widget.idUsuario,
-                          nombreCompleto: widget.nombreCompleto,
+                          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                         ),
                       );
                     },

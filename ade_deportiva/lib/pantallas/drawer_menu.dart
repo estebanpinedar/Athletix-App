@@ -4,11 +4,13 @@ import 'screens.dart';
 class DrawerMenu extends StatefulWidget {
   final int idUsuario;
   final String nombreCompleto;
+  final String rol;
 
   const DrawerMenu({
     super.key,
     required this.idUsuario,
     required this.nombreCompleto,
+    required this.rol,
   });
 
   @override
@@ -120,7 +122,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     InicioUsuario(
                       nombreCompleto: widget.nombreCompleto,
-                      idUsuario: widget.idUsuario, rol: '',
+                      idUsuario: widget.idUsuario, rol: widget.rol,
                     ),
                   ),
                 ),
@@ -131,7 +133,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     PerfilUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
+                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                     ),
                   ),
                 ),
@@ -142,7 +144,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     RegistrarEntrenamiento(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
+                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                     ),
                   ),
                 ),
@@ -151,7 +153,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   leading: const Icon(Icons.fitness_center),
                   title: const Text("Mis entrenamientos"),
                   onTap: () => _navegar(
-                    MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                    MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
                   ),
                 ),
 
@@ -161,7 +163,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     CalendarioUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
+                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                     ),
                   ),
                 ),
@@ -172,7 +174,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     NotificacionesUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
+                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                     ),
                   ),
                 ),
@@ -181,7 +183,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   leading: const Icon(Icons.assignment),
                   title: const Text("Resumen"),
                   onTap: () => _navegar(
-                    Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                    Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
                   ),
                 ),
 
@@ -189,7 +191,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   leading: const Icon(Icons.history),
                   title: const Text("Historial"),
                   onTap: () => _navegar(
-                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
                   ),
                 ),
               ],

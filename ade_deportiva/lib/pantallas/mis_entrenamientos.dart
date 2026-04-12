@@ -3,7 +3,7 @@ import 'animaciones.dart';
 import 'modificar_entrenamiento.dart';
 
 class MisEntrenamientos extends StatefulWidget {
-  const MisEntrenamientos({super.key, required int idUsuario, required String nombreCompleto});
+  const MisEntrenamientos({super.key, required int idUsuario, required String nombreCompleto, required String rol});
 
   @override
   State<MisEntrenamientos> createState() => _MisEntrenamientosState();

@@ -6,11 +6,13 @@ import 'screens.dart';
 class PerfilUsuario extends StatefulWidget {
   final int idUsuario;
   final String nombreCompleto;
+  final String rol;
 
   const PerfilUsuario({
     super.key,
     required this.idUsuario,
     required this.nombreCompleto,
+    required this.rol,
   });
 
   @override
@@ -357,7 +359,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
 
       body: SafeArea(
         child: Column(
@@ -494,7 +496,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               context,
               InicioUsuario(
                 nombreCompleto: widget.nombreCompleto,
-                idUsuario: widget.idUsuario, rol: '',
+                idUsuario: widget.idUsuario, rol: widget.rol,
               ),
             );
           } else if (index == 1) {
@@ -502,20 +504,20 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               context,
               CalendarioUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
+                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
               ),
             );
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
             );
           } else if (index == 3) {
             navegarRapido(
               context,
               NotificacionesUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
+                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
               ),
             );
           }

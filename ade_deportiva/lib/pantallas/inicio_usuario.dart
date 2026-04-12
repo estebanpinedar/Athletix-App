@@ -17,60 +17,6 @@ class InicioUsuario extends StatefulWidget {
   State<InicioUsuario> createState() => _InicioUsuarioState();
 }
 
-class VerEntrenamientosEntrenador extends StatelessWidget {
-  final int idUsuario;
-  final String nombreCompleto;
-
-  const VerEntrenamientosEntrenador({
-    super.key,
-    required this.idUsuario,
-    required this.nombreCompleto,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
-      appBar: AppBar(
-        title: const Text("Entrenamientos"),
-      ),
-      body: const Center(
-        child: Text(
-          "Aquí verás los entrenamientos del entrenador",
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-class GestionEspacios extends StatelessWidget {
-  final int idUsuario;
-  final String nombreCompleto;
-
-  const GestionEspacios({
-    super.key,
-    required this.idUsuario,
-    required this.nombreCompleto,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
-      appBar: AppBar(
-        title: const Text("Gestión de Espacios"),
-      ),
-      body: const Center(
-        child: Text(
-          "Aquí podrás crear, editar y eliminar espacios",
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
 class _InicioUsuarioState extends State<InicioUsuario> {
   int indiceSeleccionado = 0;
 
@@ -94,6 +40,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
       drawer: DrawerMenu(
         idUsuario: widget.idUsuario,
         nombreCompleto: widget.nombreCompleto,
+        rol: widget.rol,
       ),
 
       body: SafeArea(
@@ -120,7 +67,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           context,
                           PerfilUsuario(
                             idUsuario: widget.idUsuario,
-                            nombreCompleto: widget.nombreCompleto,
+                            nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                           ),
                         );
                       },
@@ -168,6 +115,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           VerEntrenamientosEntrenador(
                             idUsuario: widget.idUsuario,
                             nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
                           ),
                         );
                       },
@@ -179,11 +127,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.fitness_center,
-                              size: 50,
-                              color: Colors.white,
-                            ), // 🔥 ICONO NUEVO
+                            Image.asset("assets/images/registrar_entrenamiento.png", width: 60), // 🔥 ICONO NUEVO
                             const SizedBox(width: 15),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,6 +156,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           RegistrarEntrenamiento(
                             idUsuario: widget.idUsuario,
                             nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
                           ),
                         );
                       },
@@ -263,7 +208,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                                 context,
                                 GestionEspacios(
                                   idUsuario: widget.idUsuario,
-                                  nombreCompleto: widget.nombreCompleto,
+                                  nombreCompleto: widget.nombreCompleto, rol: widget.rol,
                                 ),
                               );
                             },
@@ -277,11 +222,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.space_dashboard,
-                                    size: 50,
-                                    color: Colors.white,
-                                  ), // 🔥 ICONO NUEVO
+                                  Image.asset("assets/images/espacios.png", width: 60), // 🔥 ICONO NUEVO
                                   const Spacer(),
                                   const Text(
                                     "Espacios",
@@ -310,6 +251,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                                 MisEntrenamientos(
                                   idUsuario: widget.idUsuario,
                                   nombreCompleto: widget.nombreCompleto,
+                                  rol: widget.rol,
                                 ),
                               );
                             },
@@ -359,6 +301,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           Resumen(
                             idUsuario: widget.idUsuario,
                             nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
                           ),
                         );
                       },
@@ -406,6 +349,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                     Historial(
                       idUsuario: widget.idUsuario,
                       nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
                     ),
                   );
                 },
@@ -456,7 +400,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               context,
               CalendarioUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
+                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
               ),
             );
           } else if (index == 2) {
@@ -464,7 +408,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               context,
               RegistrarEntrenamiento(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
+                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
               ),
             );
           } else if (index == 3) {
@@ -473,6 +417,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               NotificacionesUsuario(
                 idUsuario: widget.idUsuario,
                 nombreCompleto: widget.nombreCompleto,
+                rol: widget.rol,
               ),
             );
           } else if (index == 4) {
@@ -480,7 +425,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               context,
               PerfilUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
+                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
               ),
             );
           }

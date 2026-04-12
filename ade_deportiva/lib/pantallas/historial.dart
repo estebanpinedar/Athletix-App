@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Historial extends StatefulWidget {
-  const Historial({super.key, required int idUsuario, required String nombreCompleto});
+  const Historial({super.key, required int idUsuario, required String nombreCompleto, required String rol});
 
   @override
   State<Historial> createState() => _HistorialState();

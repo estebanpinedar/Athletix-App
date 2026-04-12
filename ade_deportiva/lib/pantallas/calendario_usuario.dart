@@ -5,8 +5,9 @@ import 'screens.dart';
 class CalendarioUsuario extends StatefulWidget {
   final int idUsuario;
   final String nombreCompleto;
+  final String rol;
 
-  const CalendarioUsuario({super.key, required this.idUsuario, required this.nombreCompleto});
+  const CalendarioUsuario({super.key, required this.idUsuario, required this.nombreCompleto, required this.rol});
 
   @override
   State<CalendarioUsuario> createState() => _CalendarioUsuarioState();
@@ -20,7 +21,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
       body: SafeArea(
         child: Column(
           children: [
@@ -45,7 +46,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                       onPressed: () {
                         navegarRapido(
                           context,
-                          PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                          PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
                         );
                       },
                     ),
@@ -132,20 +133,20 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
           if (index == 0) {
             navegarRapido(
               context,
-              InicioUsuario(nombreCompleto: widget.nombreCompleto, idUsuario: widget.idUsuario, rol: '',),
+              InicioUsuario(nombreCompleto: widget.nombreCompleto, idUsuario: widget.idUsuario, rol: widget.rol,),
             );
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
             );
           } else if (index == 3) {
             navegarRapido(
               context,
-              NotificacionesUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+              NotificacionesUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
             );
           } else if (index == 4) {
-            navegarRapido(context, PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,));
+            navegarRapido(context, PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,));
           }
         },
 
