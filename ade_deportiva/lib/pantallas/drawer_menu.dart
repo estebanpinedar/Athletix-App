@@ -18,14 +18,11 @@ class DrawerMenu extends StatefulWidget {
 }
 
 class _DrawerMenuState extends State<DrawerMenu> {
-
   void _mostrarDialogoCerrarSesion() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -99,7 +96,6 @@ class _DrawerMenuState extends State<DrawerMenu> {
       backgroundColor: const Color(0xFFE8EEF2),
       child: Column(
         children: [
-
           /// HEADER
           Container(
             height: 100,
@@ -115,55 +111,92 @@ class _DrawerMenuState extends State<DrawerMenu> {
           Expanded(
             child: ListView(
               children: [
-
+                /// INICIO
                 ListTile(
                   leading: const Icon(Icons.home),
                   title: const Text("Inicio"),
                   onTap: () => _navegar(
                     InicioUsuario(
                       nombreCompleto: widget.nombreCompleto,
-                      idUsuario: widget.idUsuario, rol: widget.rol,
+                      idUsuario: widget.idUsuario,
+                      rol: widget.rol,
                     ),
                   ),
                 ),
 
+                /// PERFIL
                 ListTile(
                   leading: const Icon(Icons.person),
                   title: const Text("Perfil de usuario"),
                   onTap: () => _navegar(
                     PerfilUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                      nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
                     ),
                   ),
                 ),
 
-                ListTile(
-                  leading: const Icon(Icons.add_box),
-                  title: const Text("Registrar entrenamiento"),
-                  onTap: () => _navegar(
-                    RegistrarEntrenamiento(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                /// 🔥 OPCIONES SEGÚN ROL
+                if (widget.rol == "alumno") ...[
+                  ListTile(
+                    leading: const Icon(Icons.add_box),
+                    title: const Text("Registrar entrenamiento"),
+                    onTap: () => _navegar(
+                      RegistrarEntrenamiento(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
                     ),
                   ),
-                ),
 
-                ListTile(
-                  leading: const Icon(Icons.fitness_center),
-                  title: const Text("Mis entrenamientos"),
-                  onTap: () => _navegar(
-                    MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
+                  ListTile(
+                    leading: const Icon(Icons.fitness_center),
+                    title: const Text("Mis entrenamientos"),
+                    onTap: () => _navegar(
+                      MisEntrenamientos(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
                   ),
-                ),
+                ] else if (widget.rol == "entrenador") ...[
+                  ListTile(
+                    leading: const Icon(Icons.visibility),
+                    title: const Text("Ver entrenamientos"),
+                    onTap: () => _navegar(
+                      VerEntrenamientosEntrenador(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
 
+                  ListTile(
+                    leading: const Icon(Icons.location_on),
+                    title: const Text("Espacios"),
+                    onTap: () => _navegar(
+                      GestionEspacios(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+                ],
+
+                /// 🔥 COMUNES (AMBOS)
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: const Text("Calendario"),
                   onTap: () => _navegar(
                     CalendarioUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                      nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
                     ),
                   ),
                 ),
@@ -174,7 +207,8 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     NotificacionesUsuario(
                       idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                      nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
                     ),
                   ),
                 ),
@@ -183,7 +217,11 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   leading: const Icon(Icons.assignment),
                   title: const Text("Resumen"),
                   onTap: () => _navegar(
-                    Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
+                    Resumen(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
+                    ),
                   ),
                 ),
 
@@ -191,7 +229,11 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   leading: const Icon(Icons.history),
                   title: const Text("Historial"),
                   onTap: () => _navegar(
-                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
+                    Historial(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                      rol: widget.rol,
+                    ),
                   ),
                 ),
               ],
