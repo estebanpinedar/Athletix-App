@@ -426,12 +426,6 @@ app.delete("/espacios/:id", async (req, res) => {
   }
 });
 
-//OBTENER DEPORTES
-app.get("/deportes", async (req, res) => {
-  const result = await db.execute("SELECT * FROM deportes");
-  res.json(result.rows);
-});
-
 //ESPACIOS POR DEPORTE (CON ENTRENADOR)
 app.get("/espacios/deporte/:id", async (req, res) => {
   const { id } = req.params;
