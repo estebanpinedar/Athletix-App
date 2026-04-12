@@ -491,7 +491,7 @@ app.post("/entrenamientos", async (req, res) => {
   const { id_deporte, id_espacio, fecha, hora } = req.body;
 
   try {
-    // 1) Traer el id_usuario guardado en el espacio
+    // 🔥 1) Traer directamente el id_entrenador REAL
     const espacio = await db.execute({
       sql: "SELECT id_entrenador FROM espacios WHERE id_espacio = ?",
       args: [id_espacio],
@@ -501,24 +501,9 @@ app.post("/entrenamientos", async (req, res) => {
       return res.json({ success: false, error: "Espacio no encontrado" });
     }
 
-    const id_usuario = espacio.rows[0].id_entrenador;
+    const id_entrenador = espacio.rows[0].id_entrenador; // ✅ YA ES CORRECTO
 
-    // 2) Convertir a id_entrenador REAL desde la tabla entrenadores
-    const entrenador = await db.execute({
-      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
-      args: [id_usuario],
-    });
-
-    if (entrenador.rows.length === 0) {
-      return res.json({
-        success: false,
-        error: "No existe ese entrenador en la tabla entrenadores",
-      });
-    }
-
-    const id_entrenador = entrenador.rows[0].id_entrenador;
-
-    // 3) Insertar correctamente
+    // 🔥 2) Insertar directamente
     await db.execute({
       sql: `
         INSERT INTO entrenamientos 
