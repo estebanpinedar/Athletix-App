@@ -300,4 +300,6 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
       ),
     );
   }
+  
 }
+

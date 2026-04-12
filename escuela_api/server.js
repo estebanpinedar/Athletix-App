@@ -448,21 +448,26 @@ app.post("/entrenamientos", async (req, res) => {
   const { id_deporte, id_espacio, fecha, hora } = req.body;
 
   try {
-    // 🔥 obtener entrenador desde el espacio
-    const espacio = await db.execute({
+    // 🔥 SACAR EL ENTRENADOR DESDE LA TABLA ESPACIOS
+    const result = await db.execute({
       sql: "SELECT id_entrenador FROM espacios WHERE id_espacio = ?",
       args: [id_espacio],
     });
 
-    if (espacio.rows.length === 0) {
-      return res.json({ success: false, error: "Espacio no encontrado" });
+    if (result.rows.length === 0) {
+      return res.json({
+        success: false,
+        error: "Espacio no encontrado",
+      });
     }
 
-    const id_entrenador = espacio.rows[0].id_entrenador;
+    const id_entrenador = result.rows[0].id_entrenador;
 
+    // 🔥 INSERTAR ENTRENAMIENTO
     await db.execute({
       sql: `
-        INSERT INTO entrenamientos (id_deporte, id_espacio, id_entrenador, fecha, hora)
+        INSERT INTO entrenamientos 
+        (id_deporte, id_espacio, id_entrenador, fecha, hora)
         VALUES (?, ?, ?, ?, ?)
       `,
       args: [id_deporte, id_espacio, id_entrenador, fecha, hora],
@@ -471,8 +476,11 @@ app.post("/entrenamientos", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    console.log(error); // 🔥 IMPORTANTE
-    res.json({ success: false, error: error.message });
+    console.log("ERROR ENTRENAMIENTO:", error);
+    res.json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
