@@ -376,13 +376,26 @@ app.post("/espacios", async (req, res) => {
 });
 
 // 🔥 OBTENER ESPACIOS POR ENTRENADOR
-app.get("/espacios/:idEntrenador", async (req, res) => {
-  const { idEntrenador } = req.params;
+app.get("/espacios/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
 
   try {
+    // 🔥 convertir usuario → entrenador
+    const resultEntrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [idUsuario],
+    });
+
+    if (resultEntrenador.rows.length === 0) {
+      return res.json({ success: false, error: "No es entrenador" });
+    }
+
+    const id_entrenador = resultEntrenador.rows[0].id_entrenador;
+
+    // 🔥 ahora sí buscar espacios
     const result = await db.execute({
       sql: "SELECT * FROM espacios WHERE id_entrenador = ?",
-      args: [idEntrenador],
+      args: [id_entrenador],
     });
 
     res.json({
