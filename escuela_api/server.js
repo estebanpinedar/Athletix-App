@@ -448,22 +448,34 @@ app.post("/entrenamientos", async (req, res) => {
   const { id_deporte, id_espacio, fecha, hora } = req.body;
 
   try {
-    // 🔥 SACAR EL ENTRENADOR DESDE EL ESPACIO
-    const result = await db.execute({
+    // 1) Traer el id_usuario guardado en el espacio
+    const espacio = await db.execute({
       sql: "SELECT id_entrenador FROM espacios WHERE id_espacio = ?",
       args: [id_espacio],
     });
 
-    if (result.rows.length === 0) {
+    if (espacio.rows.length === 0) {
+      return res.json({ success: false, error: "Espacio no encontrado" });
+    }
+
+    const id_usuario = espacio.rows[0].id_entrenador;
+
+    // 2) Convertir a id_entrenador REAL desde la tabla entrenadores
+    const entrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [id_usuario],
+    });
+
+    if (entrenador.rows.length === 0) {
       return res.json({
         success: false,
-        error: "Espacio no encontrado",
+        error: "No existe ese entrenador en la tabla entrenadores",
       });
     }
 
-    const id_entrenador = result.rows[0].id_entrenador;
+    const id_entrenador = entrenador.rows[0].id_entrenador;
 
-    // 🔥 INSERTAR ENTRENAMIENTO
+    // 3) Insertar correctamente
     await db.execute({
       sql: `
         INSERT INTO entrenamientos 
@@ -476,7 +488,7 @@ app.post("/entrenamientos", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    console.log(error);
+    console.log("ERROR ENTRENAMIENTO:", error);
     res.json({ success: false, error: error.message });
   }
 });
