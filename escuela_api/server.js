@@ -326,6 +326,36 @@ app.delete("/usuarios/:id", async (req, res) => {
   }
 });
 
+//OBTENER DEPORTES
+app.get("/deportes", async (req, res) => {
+  try {
+    const result = await db.execute("SELECT id_deporte, nombre FROM deportes");
+
+    res.json({
+      success: true,
+      deportes: result.rows,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+//REGISTRAR ESPACIO
+app.post("/espacios", async (req, res) => {
+  const { nombre, descripcion, id_deporte, id_entrenador } = req.body;
+
+  try {
+    await db.execute({
+      sql: `INSERT INTO espacios (nombre, descripcion, id_deporte, id_entrenador)
+            VALUES (?, ?, ?, ?)`,
+      args: [nombre, descripcion, id_deporte, id_entrenador],
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // =========================
 // 🚀 SERVIDOR

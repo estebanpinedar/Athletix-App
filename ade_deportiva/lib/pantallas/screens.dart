@@ -15,3 +15,4 @@ export 'drawer_menu.dart';
 export 'modificar_informacion.dart';
 export 'ver_entrenamientos_entrenador.dart';
 export 'gestion_espacios.dart';
+export 'registro_espacio.dart';

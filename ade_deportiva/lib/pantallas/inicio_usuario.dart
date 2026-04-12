@@ -67,7 +67,8 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           context,
                           PerfilUsuario(
                             idUsuario: widget.idUsuario,
-                            nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                            nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
                           ),
                         );
                       },
@@ -127,7 +128,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                         ),
                         child: Row(
                           children: [
-                            Image.asset("assets/images/registrar_entrenamiento.png", width: 60), // 🔥 ICONO NUEVO
+                            Image.asset(
+                              "assets/images/registrar_entrenamiento.png",
+                              width: 60,
+                            ), // 🔥 ICONO NUEVO
                             const SizedBox(width: 15),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +212,8 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                                 context,
                                 GestionEspacios(
                                   idUsuario: widget.idUsuario,
-                                  nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                                  nombreCompleto: widget.nombreCompleto,
+                                  rol: widget.rol,
                                 ),
                               );
                             },
@@ -222,7 +227,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset("assets/images/espacios.png", width: 60), // 🔥 ICONO NUEVO
+                                  Image.asset(
+                                    "assets/images/espacios.png",
+                                    width: 60,
+                                  ), // 🔥 ICONO NUEVO
                                   const Spacer(),
                                   const Text(
                                     "Espacios",
@@ -400,17 +408,26 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               context,
               CalendarioUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                nombreCompleto: widget.nombreCompleto,
+                rol: widget.rol,
               ),
             );
           } else if (index == 2) {
-            navegarRapido(
-              context,
-              RegistrarEntrenamiento(
-                idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
-              ),
-            );
+            if (widget.rol == "entrenador") {
+              navegarRapido(
+                context,
+                RegistroEspacio(idUsuario: widget.idUsuario),
+              );
+            } else {
+              navegarRapido(
+                context,
+                RegistrarEntrenamiento(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            }
           } else if (index == 3) {
             navegarRapido(
               context,
@@ -425,7 +442,8 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               context,
               PerfilUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+                nombreCompleto: widget.nombreCompleto,
+                rol: widget.rol,
               ),
             );
           }
