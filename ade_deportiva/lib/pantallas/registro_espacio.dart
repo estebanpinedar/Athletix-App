@@ -5,7 +5,10 @@ import 'dart:convert';
 class RegistroEspacio extends StatefulWidget {
   final int idUsuario;
 
-  const RegistroEspacio({super.key, required this.idUsuario});
+  const RegistroEspacio({
+    super.key,
+    required this.idUsuario,
+  });
 
   @override
   State<RegistroEspacio> createState() => _RegistroEspacioState();
@@ -27,7 +30,7 @@ class _RegistroEspacioState extends State<RegistroEspacio> {
     obtenerDeportes();
   }
 
-  /// 🔥 TRAER DEPORTES
+  /// 🔥 TRAER DEPORTES DESDE BD
   Future<void> obtenerDeportes() async {
     try {
       var response = await http.get(Uri.parse("$baseUrl/deportes"));
@@ -86,76 +89,164 @@ class _RegistroEspacioState extends State<RegistroEspacio> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-      appBar: AppBar(
-        title: const Text("Registro de espacio"),
-        backgroundColor: const Color(0xFFE8EEF2),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
 
-            /// NOMBRE
-            TextField(
-              controller: nombreController,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.sports),
-                hintText: "Nombre del espacio",
+              /// 🔥 LOGO
+              Center(
+                child: Image.asset("assets/images/logo.png", height: 160),
               ),
-            ),
+              const SizedBox(height: 10),
 
-            const SizedBox(height: 15),
-
-            /// DEPORTE
-            DropdownButtonFormField<int>(
-              value: deporteSeleccionado,
-              hint: const Text("Selecciona deporte"),
-              items: deportes.map<DropdownMenuItem<int>>((dep) {
-                return DropdownMenuItem(
-                  value: dep["id_deporte"],
-                  child: Text(dep["nombre"]),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  deporteSeleccionado = value;
-                });
-              },
-            ),
-
-            const SizedBox(height: 15),
-
-            /// DESCRIPCION
-            TextField(
-              controller: descripcionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.description),
-                hintText: "Descripción",
+              /// 🔥 TITULO
+              const Text(
+                "Registro de espacio",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-            ),
 
-            const SizedBox(height: 25),
+              const SizedBox(height: 30),
 
-            /// BOTON
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: registrarEspacio,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+              /// 🔥 NOMBRE
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
                 ),
-                child: const Text("Registrar"),
+                child: Row(
+                  children: [
+                    const Icon(Icons.place, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: nombreController,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Nombre del espacio",
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
-            ),
-          ],
+              /// 🔥 DEPORTE (DESDE BD)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.sports, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          labelText: "Seleccionar deporte",
+                        ),
+                        value: deporteSeleccionado,
+                        items: deportes.map<DropdownMenuItem<int>>((dep) {
+                          return DropdownMenuItem(
+                            value: dep["id_deporte"],
+                            child: Text(dep["nombre"]),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            deporteSeleccionado = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// 🔥 DESCRIPCIÓN
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.description, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: descripcionController,
+                        maxLines: 3,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Descripción",
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              /// 🔥 BOTON REGISTRAR
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: registrarEspacio,
+                  child: const Text(
+                    "Registrar",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              /// 🔥 BOTON CANCELAR
+              SizedBox(
+                width: 150,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade100,
+                    side: BorderSide(color: Colors.grey.shade400),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    "Cancelar",
+                    style: TextStyle(color: Colors.black, fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
