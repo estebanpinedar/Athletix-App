@@ -381,6 +381,33 @@ app.get("/espacios/:idEntrenador", async (req, res) => {
 });
 
 // =========================
+// ✏️ MODIFICAR ESPACIO
+// =========================
+app.put("/espacios/:id", async (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, id_deporte } = req.body;
+
+  try {
+    await db.execute({
+      sql: `
+        UPDATE espacios 
+        SET nombre = ?, descripcion = ?, id_deporte = ?
+        WHERE id_espacio = ?
+      `,
+      args: [nombre, descripcion, id_deporte, id],
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// =========================
 // 🚀 SERVIDOR
 // =========================
 app.listen(PORT, "0.0.0.0", () => {

@@ -20,7 +20,6 @@ class GestionEspacios extends StatefulWidget {
 }
 
 class _GestionEspaciosState extends State<GestionEspacios> {
-
   List espacios = [];
   List espaciosFiltrados = [];
   bool cargando = true;
@@ -30,7 +29,9 @@ class _GestionEspaciosState extends State<GestionEspacios> {
   /// 🔥 OBTENER ESPACIOS DEL ENTRENADOR
   Future<void> obtenerEspacios() async {
     try {
-      var url = Uri.parse("https://escuela-deportiva-project.onrender.com/espacios/${widget.idUsuario}");
+      var url = Uri.parse(
+        "https://escuela-deportiva-project.onrender.com/espacios/${widget.idUsuario}",
+      );
 
       var response = await http.get(url);
       var data = json.decode(response.body);
@@ -54,9 +55,7 @@ class _GestionEspaciosState extends State<GestionEspacios> {
   void filtrar(String texto) {
     setState(() {
       espaciosFiltrados = espacios.where((espacio) {
-        return espacio["nombre"]
-            .toLowerCase()
-            .contains(texto.toLowerCase());
+        return espacio["nombre"].toLowerCase().contains(texto.toLowerCase());
       }).toList();
     });
   }
@@ -78,7 +77,6 @@ class _GestionEspaciosState extends State<GestionEspacios> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// 🔙 VOLVER
               IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -117,53 +115,66 @@ class _GestionEspaciosState extends State<GestionEspacios> {
                 child: cargando
                     ? const Center(child: CircularProgressIndicator())
                     : espaciosFiltrados.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "No hay espacios registrados",
-                              style: TextStyle(fontSize: 16),
+                    ? const Center(
+                        child: Text(
+                          "No hay espacios registrados",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: espaciosFiltrados.length,
+                        itemBuilder: (context, index) {
+                          var espacio = espaciosFiltrados[index];
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey.shade400),
                             ),
-                          )
-                        : ListView.builder(
-                            itemCount: espaciosFiltrados.length,
-                            itemBuilder: (context, index) {
-                              var espacio = espaciosFiltrados[index];
+                            child: ListTile(
+                              leading: const Icon(Icons.sports_soccer),
+                              title: Text(espacio["nombre"]),
+                              subtitle: Text(espacio["descripcion"] ?? ""),
 
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey.shade400),
-                                ),
-                                child: ListTile(
-                                  leading: const Icon(Icons.sports_soccer),
-                                  title: Text(espacio["nombre"]),
-                                  subtitle: Text(espacio["descripcion"] ?? ""),
-
-                                  /// 🔥 MENÚ 3 PUNTOS
-                                  trailing: PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                      if (value == "editar") {
-                                        print("Editar espacio");
-                                      } else if (value == "eliminar") {
-                                        print("Eliminar espacio");
+                              /// 🔥 MENÚ 3 PUNTOS
+                              trailing: PopupMenuButton(
+                                onSelected: (value) {
+                                  if (value == "modificar") {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ModificarEspacio(
+                                          idEspacio: espacio["id_espacio"],
+                                          idUsuario: widget.idUsuario,
+                                          nombre: espacio["nombre"],
+                                          descripcion: espacio["descripcion"],
+                                          idDeporte: espacio["id_deporte"],
+                                        ),
+                                      ),
+                                    ).then((value) {
+                                      if (value == true) {
+                                        obtenerEspacios(); // 🔥 refresca lista
                                       }
-                                    },
-                                    itemBuilder: (context) => const [
-                                      PopupMenuItem(
-                                        value: "editar",
-                                        child: Text("Modificar"),
-                                      ),
-                                      PopupMenuItem(
-                                        value: "eliminar",
-                                        child: Text("Eliminar"),
-                                      ),
-                                    ],
+                                    });
+                                  }
+                                },
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(
+                                    value: "modificar",
+                                    child: Text("Modificar"),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                  PopupMenuItem(
+                                    value: "eliminar",
+                                    child: Text("Eliminar"),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
 
               /// 🔥 BOTÓN REGISTRAR ESPACIO
