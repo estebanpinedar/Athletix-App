@@ -445,9 +445,17 @@ app.get("/espacios/deporte/:id", async (req, res) => {
 
 //GUARDAR ENTRENAMIENTO
 app.post("/entrenamientos", async (req, res) => {
-  const { id_deporte, id_espacio, id_entrenador, fecha, hora } = req.body;
+  const { id_deporte, id_espacio, fecha, hora } = req.body;
 
   try {
+    // 🔥 obtener entrenador del espacio
+    const espacio = await db.execute({
+      sql: "SELECT id_entrenador FROM espacios WHERE id_espacio = ?",
+      args: [id_espacio],
+    });
+
+    const id_entrenador = espacio.rows[0].id_entrenador;
+
     await db.execute({
       sql: `
         INSERT INTO entrenamientos (id_deporte, id_espacio, id_entrenador, fecha, hora)
@@ -457,6 +465,7 @@ app.post("/entrenamientos", async (req, res) => {
     });
 
     res.json({ success: true });
+
   } catch (error) {
     res.json({ success: false, error: error.message });
   }

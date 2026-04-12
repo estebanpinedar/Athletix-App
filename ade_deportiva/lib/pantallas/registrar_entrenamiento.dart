@@ -77,7 +77,6 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
       body: jsonEncode({
         "id_deporte": idDeporte,
         "id_espacio": idEspacio,
-        "id_entrenador": widget.idUsuario,
         "fecha": fechaSeleccionada.toString().split(" ")[0],
         "hora":
             "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
