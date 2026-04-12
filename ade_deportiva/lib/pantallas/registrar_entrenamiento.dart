@@ -15,8 +15,7 @@ class RegistrarEntrenamiento extends StatefulWidget {
   });
 
   @override
-  State<RegistrarEntrenamiento> createState() =>
-      _RegistrarEntrenamientoState();
+  State<RegistrarEntrenamiento> createState() => _RegistrarEntrenamientoState();
 }
 
 class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
@@ -29,7 +28,8 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
   List deportes = [];
   List espacios = [];
 
-  final String api = "https://escuela-deportiva-project.onrender.com"; // 🔥 CAMBIA
+  final String api =
+      "https://escuela-deportiva-project.onrender.com"; // 🔥 CAMBIA
 
   @override
   void initState() {
@@ -78,16 +78,16 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
         "id_entrenador": widget.idUsuario,
         "fecha": fechaSeleccionada.toString().split(" ")[0],
         "hora":
-            "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
+            "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
       }),
     );
 
     var data = json.decode(res.body);
 
     if (data["success"]) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Entrenamiento registrado")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Entrenamiento registrado")));
       Navigator.pop(context);
     }
   }
@@ -113,9 +113,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.blue,
-            ),
+            colorScheme: const ColorScheme.light(primary: Colors.blue),
           ),
           child: child!,
         );
@@ -147,7 +145,6 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-
               Image.asset("assets/images/logo.png", height: 140),
 
               const SizedBox(height: 10),
@@ -161,18 +158,23 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
               /// 🔥 DEPORTE
               DropdownButtonFormField<int>(
-                value: idDeporte,
+                value: deportes.any((d) => d["id_deporte"] == idDeporte)
+                    ? idDeporte
+                    : null,
                 hint: const Text("Seleccionar deporte"),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade200,
-                  prefixIcon: const Icon(Icons.sports),
+                  prefixIcon: const Icon(
+                    Icons.sports_soccer,
+                    color: Colors.blue,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 items: deportes.map<DropdownMenuItem<int>>((d) {
-                  return DropdownMenuItem(
+                  return DropdownMenuItem<int>(
                     value: d["id_deporte"],
                     child: Text(d["nombre"]),
                   );
@@ -184,7 +186,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                     espacios = [];
                   });
 
-                  obtenerEspacios(value!);
+                  if (value != null) {
+                    obtenerEspacios(value);
+                  }
                 },
               ),
 
@@ -206,8 +210,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                   items: espacios.map<DropdownMenuItem<int>>((e) {
                     return DropdownMenuItem(
                       value: e["id_espacio"],
-                      child: Text(
-                          "${e["nombre"]} - ${e["entrenador"]}"),
+                      child: Text("${e["nombre"]} - ${e["entrenador"]}"),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -223,16 +226,26 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               GestureDetector(
                 onTap: seleccionarFecha,
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.calendar_today, color: Colors.blue),
                       const SizedBox(width: 10),
-                      Text(formatoFecha()),
+                      Expanded(
+                        child: Text(
+                          fechaSeleccionada == null
+                              ? "Seleccionar fecha"
+                              : "${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}",
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -244,16 +257,26 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               GestureDetector(
                 onTap: seleccionarHora,
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.access_time, color: Colors.blue),
                       const SizedBox(width: 10),
-                      Text(formatoHora()),
+                      Expanded(
+                        child: Text(
+                          horaSeleccionada == null
+                              ? "Seleccionar hora"
+                              : "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
+                        ),
+                      ),
                     ],
                   ),
                 ),
