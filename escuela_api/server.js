@@ -448,11 +448,15 @@ app.post("/entrenamientos", async (req, res) => {
   const { id_deporte, id_espacio, fecha, hora } = req.body;
 
   try {
-    // 🔥 obtener entrenador del espacio
+    // 🔥 obtener entrenador desde el espacio
     const espacio = await db.execute({
       sql: "SELECT id_entrenador FROM espacios WHERE id_espacio = ?",
       args: [id_espacio],
     });
+
+    if (espacio.rows.length === 0) {
+      return res.json({ success: false, error: "Espacio no encontrado" });
+    }
 
     const id_entrenador = espacio.rows[0].id_entrenador;
 
@@ -467,6 +471,7 @@ app.post("/entrenamientos", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
+    console.log(error); // 🔥 IMPORTANTE
     res.json({ success: false, error: error.message });
   }
 });
