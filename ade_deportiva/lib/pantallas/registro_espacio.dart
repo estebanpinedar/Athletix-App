@@ -4,10 +4,14 @@ import 'dart:convert';
 
 class RegistroEspacio extends StatefulWidget {
   final int idUsuario;
+  final String nombreCompleto;
+  final String rol;
 
   const RegistroEspacio({
     super.key,
     required this.idUsuario,
+    required this.nombreCompleto,
+    required this.rol
   });
 
   @override

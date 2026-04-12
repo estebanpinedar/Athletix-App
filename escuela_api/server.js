@@ -357,6 +357,29 @@ app.post("/espacios", async (req, res) => {
   }
 });
 
+// 🔥 OBTENER ESPACIOS POR ENTRENADOR
+app.get("/espacios/:idEntrenador", async (req, res) => {
+  const { idEntrenador } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: "SELECT * FROM espacios WHERE id_entrenador = ?",
+      args: [idEntrenador],
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================

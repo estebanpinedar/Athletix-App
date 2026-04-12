@@ -416,7 +416,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
             if (widget.rol == "entrenador") {
               navegarRapido(
                 context,
-                RegistroEspacio(idUsuario: widget.idUsuario),
+                RegistroEspacio(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
               );
             } else {
               navegarRapido(
