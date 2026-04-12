@@ -357,7 +357,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-      drawer: DrawerMenu(idUsuario: widget.idUsuario),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
 
       body: SafeArea(
         child: Column(
@@ -508,14 +508,14 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario),
+              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
             );
           } else if (index == 3) {
             navegarRapido(
               context,
               NotificacionesUsuario(
                 idUsuario: widget.idUsuario,
-                nombreCompleto: '',
+                nombreCompleto: widget.nombreCompleto,
               ),
             );
           }

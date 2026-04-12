@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'screens.dart';
-import 'drawer_menu.dart';
 
 class CalendarioUsuario extends StatefulWidget {
   final int idUsuario;
@@ -21,7 +20,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-      drawer: DrawerMenu(idUsuario: widget.idUsuario),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
       body: SafeArea(
         child: Column(
           children: [
@@ -138,7 +137,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario),
+              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
             );
           } else if (index == 3) {
             navegarRapido(

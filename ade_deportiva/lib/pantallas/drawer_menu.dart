@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 import 'screens.dart';
 
-class DrawerMenu extends StatelessWidget {
+class DrawerMenu extends StatefulWidget {
   final int idUsuario;
+  final String nombreCompleto;
 
-  const DrawerMenu({super.key, required this.idUsuario});
+  const DrawerMenu({
+    super.key,
+    required this.idUsuario,
+    required this.nombreCompleto,
+  });
 
-  void _mostrarDialogoCerrarSesion(BuildContext context) {
+  @override
+  State<DrawerMenu> createState() => _DrawerMenuState();
+}
+
+class _DrawerMenuState extends State<DrawerMenu> {
+
+  void _mostrarDialogoCerrarSesion() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -21,6 +34,7 @@ class DrawerMenu extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
+            /// BOTÓN CONFIRMAR
             SizedBox(
               width: 220,
               child: ElevatedButton(
@@ -44,6 +58,7 @@ class DrawerMenu extends StatelessWidget {
 
             const SizedBox(height: 12),
 
+            /// BOTÓN CANCELAR
             SizedBox(
               width: 150,
               child: OutlinedButton(
@@ -70,6 +85,12 @@ class DrawerMenu extends StatelessWidget {
     );
   }
 
+  /// MÉTODO PARA NAVEGAR (más limpio)
+  void _navegar(Widget pantalla) {
+    Navigator.pop(context);
+    navegarRapido(context, pantalla);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -93,111 +114,83 @@ class DrawerMenu extends StatelessWidget {
             child: ListView(
               children: [
 
-                /// INICIO
                 ListTile(
                   leading: const Icon(Icons.home),
                   title: const Text("Inicio"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      InicioUsuario(
-                        nombreCompleto: '',
-                        idUsuario: idUsuario,
-                      ),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    InicioUsuario(
+                      nombreCompleto: widget.nombreCompleto,
+                      idUsuario: widget.idUsuario,
+                    ),
+                  ),
                 ),
 
-                /// PERFIL
                 ListTile(
                   leading: const Icon(Icons.person),
                   title: const Text("Perfil de usuario"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      PerfilUsuario(idUsuario: idUsuario, nombreCompleto: '',),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    PerfilUsuario(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                    ),
+                  ),
                 ),
 
-                /// REGISTRAR
                 ListTile(
                   leading: const Icon(Icons.add_box),
                   title: const Text("Registrar entrenamiento"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      RegistrarEntrenamiento(idUsuario: idUsuario),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    RegistrarEntrenamiento(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                    ),
+                  ),
                 ),
 
-                /// MIS ENTRENAMIENTOS
                 ListTile(
                   leading: const Icon(Icons.fitness_center),
                   title: const Text("Mis entrenamientos"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      MisEntrenamientos(idUsuario: idUsuario),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                  ),
                 ),
 
-                /// CALENDARIO
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: const Text("Calendario"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      CalendarioUsuario(idUsuario: idUsuario, nombreCompleto: '',),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    CalendarioUsuario(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                    ),
+                  ),
                 ),
 
-                /// NOTIFICACIONES
                 ListTile(
                   leading: const Icon(Icons.notifications),
                   title: const Text("Notificaciones"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      NotificacionesUsuario(idUsuario: idUsuario, nombreCompleto: '',),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    NotificacionesUsuario(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                    ),
+                  ),
                 ),
 
-                /// RESUMEN
                 ListTile(
                   leading: const Icon(Icons.assignment),
                   title: const Text("Resumen"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      Resumen(idUsuario: idUsuario),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                  ),
                 ),
 
-                /// HISTORIAL
                 ListTile(
                   leading: const Icon(Icons.history),
                   title: const Text("Historial"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    navegarRapido(
-                      context,
-                      Historial(idUsuario: idUsuario),
-                    );
-                  },
+                  onTap: () => _navegar(
+                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                  ),
                 ),
               ],
             ),
@@ -212,7 +205,7 @@ class DrawerMenu extends StatelessWidget {
                 "Cerrar sesión",
                 style: TextStyle(color: Colors.red),
               ),
-              onTap: () => _mostrarDialogoCerrarSesion(context),
+              onTap: _mostrarDialogoCerrarSesion,
             ),
           ),
         ],

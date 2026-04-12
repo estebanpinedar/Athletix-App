@@ -32,14 +32,14 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         CalendarioUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: '',
+          nombreCompleto: widget.nombreCompleto,
         ),
       );
     } else if (index == 2) {
       navegarRapido(
         context,
         RegistrarEntrenamiento(
-          idUsuario: widget.idUsuario,
+          idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,
         ),
       );
     } else if (index == 4) {
@@ -47,7 +47,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         PerfilUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: '',
+          nombreCompleto: widget.nombreCompleto,
         ),
       );
     }
@@ -63,7 +63,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
       backgroundColor: const Color(0xFFE8EEF2),
 
       /// DRAWER
-      drawer: DrawerMenu(idUsuario: widget.idUsuario),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
 
       body: SafeArea(
         child: Column(

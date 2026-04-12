@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens.dart';
-import 'drawer_menu.dart';
 
 class InicioUsuario extends StatefulWidget {
   final String nombreCompleto;
@@ -36,7 +35,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
       backgroundColor: const Color(0xFFE8EEF2),
 
       /// 🔥 DRAWER CORREGIDO
-      drawer: DrawerMenu(idUsuario: widget.idUsuario),
+      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -101,7 +100,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                 onTap: () {
                   navegarRapido(
                     context,
-                    RegistrarEntrenamiento(idUsuario: widget.idUsuario),
+                    RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
                   );
                 },
                 child: Container(
@@ -141,7 +140,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                       onTap: () {
                         navegarRapido(
                           context,
-                          MisEntrenamientos(idUsuario: widget.idUsuario),
+                          MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
                         );
                       },
                       child: Container(
@@ -174,7 +173,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                       onTap: () {
                         navegarRapido(
                           context,
-                          Resumen(idUsuario: widget.idUsuario),
+                          Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
                         );
                       },
                       child: Container(
@@ -208,7 +207,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                 onTap: () {
                   navegarRapido(
                     context,
-                    Historial(idUsuario: widget.idUsuario),
+                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
                   );
                 },
                 child: Container(
@@ -254,7 +253,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario),
+              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
             );
           } else if (index == 3) {
             navegarRapido(
