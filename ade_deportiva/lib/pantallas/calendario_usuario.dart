@@ -136,10 +136,21 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
               InicioUsuario(nombreCompleto: widget.nombreCompleto, idUsuario: widget.idUsuario, rol: widget.rol,),
             );
           } else if (index == 2) {
-            navegarRapido(
-              context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
-            );
+            if (widget.rol == "entrenador") {
+              navegarRapido(
+                context,
+                RegistroEspacio(idUsuario: widget.idUsuario),
+              );
+            } else {
+              navegarRapido(
+                context,
+                RegistrarEntrenamiento(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            }
           } else if (index == 3) {
             navegarRapido(
               context,

@@ -38,13 +38,22 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         ),
       );
     } else if (index == 2) {
-      navegarRapido(
-        context,
-        RegistrarEntrenamiento(
-          idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,
-        ),
-      );
-    } else if (index == 4) {
+            if (widget.rol == "entrenador") {
+              navegarRapido(
+                context,
+                RegistroEspacio(idUsuario: widget.idUsuario),
+              );
+            } else {
+              navegarRapido(
+                context,
+                RegistrarEntrenamiento(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            }
+          } else if (index == 4) {
       navegarRapido(
         context,
         PerfilUsuario(
