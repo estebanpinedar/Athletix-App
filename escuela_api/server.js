@@ -342,13 +342,13 @@ app.get("/deportes", async (req, res) => {
 
 //REGISTRAR ESPACIO
 app.post("/espacios", async (req, res) => {
-  const { nombre, descripcion, id_deporte, id_entrenador } = req.body;
+  const { nombre, descripcion, id_deporte, id_usuario } = req.body;
 
   try {
     await db.execute({
       sql: `INSERT INTO espacios (nombre, descripcion, id_deporte, id_entrenador)
             VALUES (?, ?, ?, ?)`,
-      args: [nombre, descripcion, id_deporte, id_entrenador],
+      args: [nombre, descripcion, id_deporte, id_usuario], // 👈 guardas id_usuario
     });
 
     res.json({ success: true });
