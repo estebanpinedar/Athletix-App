@@ -12,47 +12,46 @@ class IniciarSesion extends StatelessWidget {
 
   /// 🔐 FUNCIÓN LOGIN
   Future<void> login(BuildContext context) async {
-  var url = Uri.parse("https://escuela-deportiva-project.onrender.com/login");
+    var url = Uri.parse("https://escuela-deportiva-project.onrender.com/login");
 
-  try {
-    var response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": emailController.text,
-        "password": passwordController.text,
-      }),
-    );
+    try {
+      var response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": emailController.text,
+          "password": passwordController.text,
+        }),
+      );
 
-    var data = json.decode(response.body);
+      var data = json.decode(response.body);
 
-    if (data["success"] == true) {
+      if (data["success"] == true) {
+        int id = int.parse(data["id"].toString());
+        String nombre = data["nombre"];
+        String rol = data["rol"]; // 🔥 ESTE ES EL NUEVO
 
-      int id = data["id"];
-      String nombre = data["nombre"];
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InicioUsuario(
-            nombreCompleto: nombre,
-            idUsuario: id,
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InicioUsuario(
+              nombreCompleto: nombre,
+              idUsuario: id,
+              rol: rol, // 🔥 SE ENVÍA AQUÍ
+            ),
           ),
-        ),
-      );
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Correo o contraseña incorrectos")),
-      );
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(data["msg"])));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
     }
-
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error de conexión: $e")),
-    );
   }
-}
 
   /// DIÁLOGO RECUPERAR CONTRASEÑA
   void _mostrarDialogoRecuperarContrasena(BuildContext context) {
@@ -99,7 +98,9 @@ class IniciarSesion extends StatelessWidget {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text("Correo enviado para restablecer contraseña"),
+                          content: Text(
+                            "Correo enviado para restablecer contraseña",
+                          ),
                         ),
                       );
                     }
@@ -186,7 +187,10 @@ class IniciarSesion extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -206,7 +210,10 @@ class IniciarSesion extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),

@@ -132,7 +132,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
           if (index == 0) {
             navegarRapido(
               context,
-              InicioUsuario(nombreCompleto: widget.nombreCompleto, idUsuario: widget.idUsuario),
+              InicioUsuario(nombreCompleto: widget.nombreCompleto, idUsuario: widget.idUsuario, rol: '',),
             );
           } else if (index == 2) {
             navegarRapido(

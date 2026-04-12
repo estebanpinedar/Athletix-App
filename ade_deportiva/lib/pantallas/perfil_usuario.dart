@@ -494,7 +494,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               context,
               InicioUsuario(
                 nombreCompleto: widget.nombreCompleto,
-                idUsuario: widget.idUsuario,
+                idUsuario: widget.idUsuario, rol: '',
               ),
             );
           } else if (index == 1) {

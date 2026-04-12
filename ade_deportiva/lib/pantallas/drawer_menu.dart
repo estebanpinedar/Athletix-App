@@ -120,7 +120,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                   onTap: () => _navegar(
                     InicioUsuario(
                       nombreCompleto: widget.nombreCompleto,
-                      idUsuario: widget.idUsuario,
+                      idUsuario: widget.idUsuario, rol: '',
                     ),
                   ),
                 ),

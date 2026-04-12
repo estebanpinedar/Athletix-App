@@ -24,7 +24,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         InicioUsuario(
           nombreCompleto: widget.nombreCompleto,
-          idUsuario: widget.idUsuario,
+          idUsuario: widget.idUsuario, rol: '',
         ),
       );
     } else if (index == 1) {

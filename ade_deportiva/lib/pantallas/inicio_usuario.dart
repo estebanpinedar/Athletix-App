@@ -4,15 +4,71 @@ import 'screens.dart';
 class InicioUsuario extends StatefulWidget {
   final String nombreCompleto;
   final int idUsuario;
+  final String rol; // 🔥 NUEVO
 
   const InicioUsuario({
     super.key,
     required this.nombreCompleto,
     required this.idUsuario,
+    required this.rol, // 🔥
   });
 
   @override
   State<InicioUsuario> createState() => _InicioUsuarioState();
+}
+
+class VerEntrenamientosEntrenador extends StatelessWidget {
+  final int idUsuario;
+  final String nombreCompleto;
+
+  const VerEntrenamientosEntrenador({
+    super.key,
+    required this.idUsuario,
+    required this.nombreCompleto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFE8EEF2),
+      appBar: AppBar(
+        title: const Text("Entrenamientos"),
+      ),
+      body: const Center(
+        child: Text(
+          "Aquí verás los entrenamientos del entrenador",
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+class GestionEspacios extends StatelessWidget {
+  final int idUsuario;
+  final String nombreCompleto;
+
+  const GestionEspacios({
+    super.key,
+    required this.idUsuario,
+    required this.nombreCompleto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFE8EEF2),
+      appBar: AppBar(
+        title: const Text("Gestión de Espacios"),
+      ),
+      body: const Center(
+        child: Text(
+          "Aquí podrás crear, editar y eliminar espacios",
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
 }
 
 class _InicioUsuarioState extends State<InicioUsuario> {
@@ -35,7 +91,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
       backgroundColor: const Color(0xFFE8EEF2),
 
       /// 🔥 DRAWER CORREGIDO
-      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+      drawer: DrawerMenu(
+        idUsuario: widget.idUsuario,
+        nombreCompleto: widget.nombreCompleto,
+      ),
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -43,7 +102,6 @@ class _InicioUsuarioState extends State<InicioUsuario> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// ICONOS
               Builder(
                 builder: (context) => Row(
@@ -60,7 +118,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                       onPressed: () {
                         navegarRapido(
                           context,
-                          PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+                          PerfilUsuario(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
+                          ),
                         );
                       },
                     ),
@@ -77,7 +138,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               ),
               Text(
                 nombreCorto,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 20),
@@ -96,74 +160,193 @@ class _InicioUsuarioState extends State<InicioUsuario> {
               const SizedBox(height: 25),
 
               /// REGISTRAR
-              InkWell(
-                onTap: () {
-                  navegarRapido(
-                    context,
-                    RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4A76B8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Image.asset("assets/images/registrar_entrenamiento.png", width: 60),
-                      const SizedBox(width: 15),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Registrar Entrenamiento",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              widget.rol == "entrenador"
+                  ? InkWell(
+                      onTap: () {
+                        navegarRapido(
+                          context,
+                          VerEntrenamientosEntrenador(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
                           ),
-                          Text("¡Registra aquí!", style: TextStyle(color: Colors.white70)),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4A76B8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.fitness_center,
+                              size: 50,
+                              color: Colors.white,
+                            ), // 🔥 ICONO NUEVO
+                            const SizedBox(width: 15),
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Ver Entrenamientos",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "Consulta tus rutinas",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    )
+                  : InkWell(
+                      onTap: () {
+                        navegarRapido(
+                          context,
+                          RegistrarEntrenamiento(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4A76B8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              "assets/images/registrar_entrenamiento.png",
+                              width: 60,
+                            ),
+                            const SizedBox(width: 15),
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Registrar Entrenamiento",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "¡Registra aquí!",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
               const SizedBox(height: 20),
 
               /// TARJETAS
               Row(
                 children: [
-
                   /// MIS ENTRENAMIENTOS
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        navegarRapido(
-                          context,
-                          MisEntrenamientos(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        height: 130,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE84141),
-                          borderRadius: BorderRadius.circular(12),
+                  widget.rol == "entrenador"
+                      ? Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              navegarRapido(
+                                context,
+                                GestionEspacios(
+                                  idUsuario: widget.idUsuario,
+                                  nombreCompleto: widget.nombreCompleto,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              height: 130,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE84141),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.space_dashboard,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ), // 🔥 ICONO NUEVO
+                                  const Spacer(),
+                                  const Text(
+                                    "Espacios",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Añade, modifica o elimina",
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      : Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              navegarRapido(
+                                context,
+                                MisEntrenamientos(
+                                  idUsuario: widget.idUsuario,
+                                  nombreCompleto: widget.nombreCompleto,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              height: 130,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE84141),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Image.asset(
+                                    "assets/images/mis_entrenamientos.png",
+                                    width: 60,
+                                  ),
+                                  const Spacer(),
+                                  const Text(
+                                    "Mis Entrenamientos",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Ver tus entrenos activos",
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset("assets/images/mis_entrenamientos.png", width: 60),
-                            const Spacer(),
-                            const Text("Mis Entrenamientos",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            const Text("Ver tus entrenos activos",
-                                style: TextStyle(color: Colors.white70, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
 
                   const SizedBox(width: 15),
 
@@ -173,7 +356,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                       onTap: () {
                         navegarRapido(
                           context,
-                          Resumen(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
+                          Resumen(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
+                          ),
                         );
                       },
                       child: Container(
@@ -188,10 +374,20 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           children: [
                             Image.asset("assets/images/resumen.png", width: 60),
                             const Spacer(),
-                            const Text("Resumen",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            const Text("Ver tus próximas actividades",
-                                style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            const Text(
+                              "Resumen",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              "Ver tus próximas actividades",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -207,7 +403,10 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                 onTap: () {
                   navegarRapido(
                     context,
-                    Historial(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
+                    Historial(
+                      idUsuario: widget.idUsuario,
+                      nombreCompleto: widget.nombreCompleto,
+                    ),
                   );
                 },
                 child: Container(
@@ -223,10 +422,17 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Historial",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text("Mira tu historial deportivo",
-                              style: TextStyle(fontSize: 12, color: Colors.blue)),
+                          Text(
+                            "Historial",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Text(
+                            "Mira tu historial deportivo",
+                            style: TextStyle(fontSize: 12, color: Colors.blue),
+                          ),
                         ],
                       ),
                     ],
@@ -248,29 +454,44 @@ class _InicioUsuarioState extends State<InicioUsuario> {
           if (index == 1) {
             navegarRapido(
               context,
-              CalendarioUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+              CalendarioUsuario(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+              ),
             );
           } else if (index == 2) {
             navegarRapido(
               context,
-              RegistrarEntrenamiento(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto,),
+              RegistrarEntrenamiento(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+              ),
             );
           } else if (index == 3) {
             navegarRapido(
               context,
-              NotificacionesUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
+              NotificacionesUsuario(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+              ),
             );
           } else if (index == 4) {
             navegarRapido(
               context,
-              PerfilUsuario(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto),
+              PerfilUsuario(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+              ),
             );
           }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle, size: 40), label: ""),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle, size: 40),
+            label: "",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
         ],
