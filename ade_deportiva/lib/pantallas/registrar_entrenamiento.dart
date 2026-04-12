@@ -158,9 +158,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
               /// 🔥 DEPORTE
               DropdownButtonFormField<int>(
-                value: deportes.any((d) => d["id_deporte"] == idDeporte)
-                    ? idDeporte
-                    : null,
+                value: idDeporte,
                 hint: const Text("Seleccionar deporte"),
                 decoration: InputDecoration(
                   filled: true,
@@ -175,11 +173,13 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                 ),
                 items: deportes.map<DropdownMenuItem<int>>((d) {
                   return DropdownMenuItem<int>(
-                    value: d["id_deporte"],
+                    value: int.parse(d["id_deporte"].toString()), // 🔥 FIX
                     child: Text(d["nombre"]),
                   );
                 }).toList(),
                 onChanged: (value) {
+                  print("Seleccionado: $value"); // 🔥 DEBUG
+
                   setState(() {
                     idDeporte = value;
                     idEspacio = null;
