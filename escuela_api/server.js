@@ -345,15 +345,33 @@ app.post("/espacios", async (req, res) => {
   const { nombre, descripcion, id_deporte, id_usuario } = req.body;
 
   try {
+    // 🔥 convertir usuario → entrenador
+    const result = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [id_usuario],
+    });
+
+    if (result.rows.length === 0) {
+      return res.json({
+        success: false,
+        error: "El usuario no es entrenador",
+      });
+    }
+
+    const id_entrenador = result.rows[0].id_entrenador;
+
+    // 🔥 guardar el ID CORRECTO
     await db.execute({
       sql: `INSERT INTO espacios (nombre, descripcion, id_deporte, id_entrenador)
             VALUES (?, ?, ?, ?)`,
-      args: [nombre, descripcion, id_deporte, id_usuario], // 👈 guardas id_usuario
+      args: [nombre, descripcion, id_deporte, id_entrenador],
     });
 
     res.json({ success: true });
+
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.log(error);
+    res.json({ success: false, error: error.message });
   }
 });
 

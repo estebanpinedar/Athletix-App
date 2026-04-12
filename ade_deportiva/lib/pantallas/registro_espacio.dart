@@ -68,7 +68,7 @@ class _RegistroEspacioState extends State<RegistroEspacio> {
           "nombre": nombreController.text,
           "descripcion": descripcionController.text,
           "id_deporte": deporteSeleccionado,
-          "id_entrenador": widget.idUsuario,
+          "id_usuario": widget.idUsuario,
         }),
       );
 
