@@ -720,44 +720,47 @@ app.put("/equipos/:id", async (req, res) => {
     // =========================
     // 2. HORARIOS
     // =========================
-    const actual = await db.execute({
-      sql: `SELECT dia FROM horarios_equipo WHERE id_equipo = ?`,
-      args: [id],
+    // =========================
+// 2. HORARIOS (CORREGIDO)
+// =========================
+const actual = await db.execute({
+  sql: `SELECT dia FROM horarios_equipo WHERE id_equipo = ?`,
+  args: [id],
+});
+
+const diasActuales = actual.rows.map(r => r.dia);
+const nuevosDias = dias || [];
+
+// eliminar días quitados
+for (let dia of diasActuales) {
+  if (!nuevosDias.includes(dia)) {
+    await db.execute({
+      sql: `DELETE FROM horarios_equipo WHERE id_equipo = ? AND dia = ?`,
+      args: [id, dia],
     });
+  }
+}
 
-    const diasActuales = actual.rows.map(r => r.dia);
-    const nuevosDias = dias || [];
-
-    // eliminar días quitados
-    for (let dia of diasActuales) {
-      if (!nuevosDias.includes(dia)) {
-        await db.execute({
-          sql: `DELETE FROM horarios_equipo WHERE id_equipo = ? AND dia = ?`,
-          args: [id, dia],
-        });
-      }
-    }
-
-    // insertar nuevos
-    for (let dia of nuevosDias) {
-      if (!diasActuales.includes(dia)) {
-        await db.execute({
-          sql: `
-            INSERT INTO horarios_equipo (id_equipo, dia, hora)
-            VALUES (?, ?, ?)
-          `,
-          args: [id, dia, hora],
-        });
-      }
-    }
-
-    // actualizar hora
-    if (hora) {
+// 🔥 SOLO insertar si hay hora válida
+if (hora) {
+  for (let dia of nuevosDias) {
+    if (!diasActuales.includes(dia)) {
       await db.execute({
-        sql: `UPDATE horarios_equipo SET hora = ? WHERE id_equipo = ?`,
-        args: [hora, id],
+        sql: `
+          INSERT INTO horarios_equipo (id_equipo, dia, hora)
+          VALUES (?, ?, ?)
+        `,
+        args: [id, dia, hora],
       });
     }
+  }
+
+  // actualizar hora existente
+  await db.execute({
+    sql: `UPDATE horarios_equipo SET hora = ? WHERE id_equipo = ?`,
+    args: [hora, id],
+  });
+}
 
     // =========================
     // 🔔 NOTIFICACIÓN (NO ROMPE NADA)
