@@ -893,26 +893,37 @@ app.post("/inscribir", async (req, res) => {
 });
 
 //EQUIPOS FILTRADOS
+// EQUIPOS FILTRADOS (CORREGIDO)
 app.get("/equipos/disponibles/:deporte/:categoria", async (req, res) => {
   const { deporte, categoria } = req.params;
 
   try {
     const result = await db.execute({
       sql: `
-        SELECT e.*,
-        COUNT(i.id) as inscritos
+        SELECT 
+          e.*,
+          COUNT(i.id_inscripcion) as inscritos
         FROM equipos e
-        LEFT JOIN inscripciones i ON e.id_equipo = i.id_equipo
-        WHERE e.id_deporte = ? AND e.id_categoria = ?
+        LEFT JOIN inscripciones i 
+          ON e.id_equipo = i.id_equipo
+        WHERE e.id_deporte = ? 
+          AND e.id_categoria = ?
         GROUP BY e.id_equipo
       `,
       args: [deporte, categoria],
     });
 
-    res.json({ success: true, data: result.rows });
+    res.json({ 
+      success: true, 
+      data: result.rows 
+    });
 
   } catch (e) {
-    res.json({ success: false, error: e.message });
+    console.log("ERROR EQUIPOS DISPONIBLES:", e);
+    res.json({ 
+      success: false, 
+      error: e.message 
+    });
   }
 });
 
