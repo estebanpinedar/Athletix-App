@@ -20,13 +20,24 @@ class CalendarioUsuario extends StatefulWidget {
   State<CalendarioUsuario> createState() => _CalendarioUsuarioState();
 }
 
+String normalizarDia(String texto) {
+  return texto
+      .toLowerCase()
+      .replaceAll("á", "a")
+      .replaceAll("é", "e")
+      .replaceAll("í", "i")
+      .replaceAll("ó", "o")
+      .replaceAll("ú", "u")
+      .trim();
+}
+
 class _CalendarioUsuarioState extends State<CalendarioUsuario> {
   final String api = "https://escuela-deportiva-project.onrender.com";
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  Map<String, List> eventos = {}; // 🔥 eventos por día
+  Map<String, List> eventos = {};
   List eventosSeleccionados = [];
 
   @override
@@ -46,10 +57,12 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
     var res = await http.get(Uri.parse(url));
     var data = json.decode(res.body);
 
+    print("DATA BACKEND: $data");
+
     Map<String, List> temp = {};
 
     for (var e in data["data"]) {
-      String dia = e["dia"]; // lunes, martes...
+      String dia = normalizarDia(e["dia"].toString());
 
       if (!temp.containsKey(dia)) {
         temp[dia] = [];
@@ -58,13 +71,15 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
       temp[dia]!.add(e);
     }
 
+    print("MAPA EVENTOS: $temp");
+
     setState(() {
       eventos = temp;
     });
   }
 
   // =========================
-  // CONVERTIR FECHA → DIA TEXTO
+  // FECHA → DIA TEXTO
   // =========================
   String obtenerNombreDia(DateTime fecha) {
     const dias = [
@@ -74,7 +89,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
       "jueves",
       "viernes",
       "sabado",
-      "domingo"
+      "domingo",
     ];
 
     return dias[fecha.weekday - 1];
@@ -84,6 +99,18 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
   // EVENTOS DEL DIA
   // =========================
   List obtenerEventosDelDia(DateTime fecha) {
+    final hoy = DateTime.now();
+
+    // 🔥 NORMALIZAR (quitar horas)
+    final fechaSinHora = DateTime(fecha.year, fecha.month, fecha.day);
+    final hoySinHora = DateTime(hoy.year, hoy.month, hoy.day);
+
+    // ❌ SI ES FECHA PASADA → NO MOSTRAR NADA
+    if (fechaSinHora.isBefore(hoySinHora)) {
+      return [];
+    }
+
+    // ✅ SI ES HOY O FUTURO → MOSTRAR
     String dia = obtenerNombreDia(fecha);
     return eventos[dia] ?? [];
   }
@@ -131,13 +158,14 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
               ),
             ),
 
-            /// 🔥 CALENDARIO EN CARD
+            /// 🔥 CALENDARIO BONITO
             Container(
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade300),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
@@ -152,39 +180,37 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                 lastDay: DateTime.utc(2030, 12, 31),
                 focusedDay: _focusedDay,
 
-                selectedDayPredicate: (day) =>
-                    isSameDay(_selectedDay, day),
+                enabledDayPredicate: (day) {
+                  final hoy = DateTime.now();
+                  return !day.isBefore(DateTime(hoy.year, hoy.month, hoy.day));
+                },
+
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
 
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
-                    eventosSeleccionados =
-                        obtenerEventosDelDia(selectedDay);
+                    eventosSeleccionados = obtenerEventosDelDia(selectedDay);
                   });
                 },
 
                 calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
+                  todayDecoration: const BoxDecoration(
                     color: Colors.blue,
                     shape: BoxShape.circle,
                   ),
-                  selectedDecoration: BoxDecoration(
+                  selectedDecoration: const BoxDecoration(
                     color: Colors.black,
                     shape: BoxShape.circle,
                   ),
 
-                  /// 🔥 indicador de eventos
-                  markerDecoration: BoxDecoration(
+                  /// 🔴 punticos
+                  markerDecoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
                 ),
-
-                /// 🔥 MARCADORES
-                eventLoader: (day) {
-                  return obtenerEventosDelDia(day);
-                },
 
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
@@ -197,11 +223,14 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
               ),
             ),
 
-            /// 🔥 LISTA DE EVENTOS
+            /// 🔥 LISTA DE ENTRENAMIENTOS
             Expanded(
               child: eventosSeleccionados.isEmpty
                   ? const Center(
-                      child: Text("No hay entrenamientos este día"),
+                      child: Text(
+                        "No hay entrenamientos este día",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     )
                   : ListView.builder(
                       itemCount: eventosSeleccionados.length,
@@ -210,11 +239,14 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
 
                         return Container(
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade400),
                           ),
                           child: Row(
                             children: [
@@ -223,6 +255,9 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                               Expanded(
                                 child: Text(
                                   "${e["nombre"]} - ${e["hora"]}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -235,32 +270,74 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
         ),
       ),
 
-      /// NAV BAR (igual)
+      /// NAV BAR
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 0) {
-            navegarRapido(
-              context,
-              InicioUsuario(
-                nombreCompleto: widget.nombreCompleto,
-                idUsuario: widget.idUsuario,
-                rol: widget.rol,
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle, size: 40), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-        ],
-      ),
+  currentIndex: 1,
+  selectedItemColor: Colors.blue,
+  unselectedItemColor: Colors.grey,
+  type: BottomNavigationBarType.fixed,
+  onTap: (index) {
+    if (index == 0) {
+      navegarRapido(
+        context,
+        InicioUsuario(
+          nombreCompleto: widget.nombreCompleto,
+          idUsuario: widget.idUsuario,
+          rol: widget.rol,
+        ),
+      );
+    } else if (index == 2) {
+      if (widget.rol == "entrenador") {
+        navegarRapido(
+          context,
+          RegistroEspacio(
+            idUsuario: widget.idUsuario,
+            nombreCompleto: widget.nombreCompleto,
+            rol: widget.rol,
+          ),
+        );
+      } else {
+        navegarRapido(
+          context,
+          RegistrarEntrenamiento(
+            idUsuario: widget.idUsuario,
+            nombreCompleto: widget.nombreCompleto,
+            rol: widget.rol,
+          ),
+        );
+      }
+    } else if (index == 3) {
+      navegarRapido(
+        context,
+        NotificacionesUsuario(
+          idUsuario: widget.idUsuario,
+          nombreCompleto: widget.nombreCompleto,
+          rol: widget.rol,
+        ),
+      );
+    } else if (index == 4) {
+      navegarRapido(
+        context,
+        PerfilUsuario(
+          idUsuario: widget.idUsuario,
+          nombreCompleto: widget.nombreCompleto,
+          rol: widget.rol,
+        ),
+      );
+    }
+  },
+
+  items: const [
+    BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+    BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.add_circle, size: 40),
+      label: "",
+    ),
+    BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
+    BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+  ],
+),
     );
   }
 }

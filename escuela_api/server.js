@@ -3,6 +3,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { db } from "./db.js";
 
+async function crearNotificacion(id_usuario, mensaje) {
+  await db.execute({
+    sql: `
+      INSERT INTO notificaciones (id_usuario, mensaje, fecha)
+      VALUES (?, ?, datetime('now'))
+    `,
+    args: [id_usuario, mensaje],
+  });
+}
+
 dotenv.config();
 
 const app = express();
@@ -873,19 +883,27 @@ app.post("/inscribir", async (req, res) => {
       });
     }
 
+    // después del insert
     await db.execute({
       sql: `
-        INSERT INTO inscripcion (id_equipo, id_usuario)
-        VALUES (?, ?)
-      `,
+    INSERT INTO inscripcion (id_equipo, id_usuario)
+    VALUES (?, ?)
+  `,
       args: [id_equipo, id_usuario],
     });
+
+    // 🔔 NOTIFICACIÓN
+    await crearNotificacion(
+      id_usuario,
+      "Te inscribiste a un equipo correctamente"
+    );
 
     res.json({ success: true });
 
   } catch (e) {
     res.json({ success: false, msg: e.message });
   }
+
 });
 
 //EQUIPOS FILTRADOS

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'screens.dart';
 
 class NotificacionesUsuario extends StatefulWidget {
@@ -18,15 +20,52 @@ class NotificacionesUsuario extends StatefulWidget {
 }
 
 class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
-  int _currentIndex = 3;
+  final String api = "https://escuela-deportiva-project.onrender.com";
 
+  int _currentIndex = 3;
+  List notificaciones = [];
+
+  @override
+  void initState() {
+    super.initState();
+    cargarNotificaciones();
+  }
+
+  // =========================
+  // CARGAR NOTIFICACIONES
+  // =========================
+  Future<void> cargarNotificaciones() async {
+    var res = await http.get(
+      Uri.parse("$api/notificaciones/${widget.idUsuario}"),
+    );
+
+    var data = json.decode(res.body);
+
+    setState(() {
+      notificaciones = data["data"] ?? [];
+    });
+  }
+
+  // =========================
+  // ELIMINAR NOTIFICACIÓN
+  // =========================
+  void eliminarNotificacion(int index) {
+    setState(() {
+      notificaciones.removeAt(index);
+    });
+  }
+
+  // =========================
+  // NAV
+  // =========================
   void _onItemTapped(int index) {
     if (index == 0) {
       navegarRapido(
         context,
         InicioUsuario(
           nombreCompleto: widget.nombreCompleto,
-          idUsuario: widget.idUsuario, rol: widget.rol,
+          idUsuario: widget.idUsuario,
+          rol: widget.rol,
         ),
       );
     } else if (index == 1) {
@@ -34,31 +73,37 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         context,
         CalendarioUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+          nombreCompleto: widget.nombreCompleto,
+          rol: widget.rol,
         ),
       );
     } else if (index == 2) {
-            if (widget.rol == "entrenador") {
-              navegarRapido(
-                context,
-                RegistroEspacio(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
-              );
-            } else {
-              navegarRapido(
-                context,
-                RegistrarEntrenamiento(
-                  idUsuario: widget.idUsuario,
-                  nombreCompleto: widget.nombreCompleto,
-                  rol: widget.rol,
-                ),
-              );
-            }
-          } else if (index == 4) {
+      if (widget.rol == "entrenador") {
+        navegarRapido(
+          context,
+          RegistroEspacio(
+            idUsuario: widget.idUsuario,
+            nombreCompleto: widget.nombreCompleto,
+            rol: widget.rol,
+          ),
+        );
+      } else {
+        navegarRapido(
+          context,
+          RegistrarEntrenamiento(
+            idUsuario: widget.idUsuario,
+            nombreCompleto: widget.nombreCompleto,
+            rol: widget.rol,
+          ),
+        );
+      }
+    } else if (index == 4) {
       navegarRapido(
         context,
         PerfilUsuario(
           idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
+          nombreCompleto: widget.nombreCompleto,
+          rol: widget.rol,
         ),
       );
     }
@@ -73,13 +118,15 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
 
-      /// DRAWER
-      drawer: DrawerMenu(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
+      drawer: DrawerMenu(
+        idUsuario: widget.idUsuario,
+        nombreCompleto: widget.nombreCompleto,
+        rol: widget.rol,
+      ),
 
       body: SafeArea(
         child: Column(
           children: [
-
             /// HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -89,48 +136,109 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                   Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu, size: 30),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
+                      onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.account_circle, size: 32),
-                    onPressed: () {
-                      navegarRapido(
-                        context,
-                        PerfilUsuario(
-                          idUsuario: widget.idUsuario,
-                          nombreCompleto: widget.nombreCompleto, rol: widget.rol,
-                        ),
-                      );
-                    },
+                  const Text(
+                    "Notificaciones",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  const Icon(Icons.notifications, size: 28),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
-            /// TARJETA 1
-            _buildNotificacionCard(
-              icon: Icons.notifications_active,
-              title: "Aún no tienes entrenos activos",
-              subtitle: "Registra tu primer entrenamiento.",
-            ),
+            /// LISTA
+            Expanded(
+              child: notificaciones.isEmpty
+                  ? const Center(
+                      child: Text("No tienes notificaciones"),
+                    )
+                  : ListView.builder(
+                      itemCount: notificaciones.length,
+                      itemBuilder: (context, index) {
+                        final n = notificaciones[index];
 
-            /// TARJETA 2
-            _buildNotificacionCard(
-              icon: Icons.notifications_active,
-              title: "¡Bienvenid@ a SIGEDEP!",
-              subtitle:
-                  "Ya puedes gestionar tus entrenamientos de forma rápida y sencilla.",
+                        return Dismissible(
+                          key: Key(n["id_notificacion"].toString()),
+                          direction: DismissDirection.horizontal,
+
+                          onDismissed: (direction) {
+                            eliminarNotificacion(index);
+                          },
+
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+
+                          secondaryBackground: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 5,
+                                )
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.notifications,
+                                    color: Colors.blue),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        n["titulo"] ?? "",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(n["mensaje"] ?? ""),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        n["fecha"] ?? "",
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
       ),
 
-      /// BOTTOM NAVIGATION
+      /// NAVBAR
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue,
@@ -141,56 +249,10 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, size: 40),
-            label: "",
-          ),
+              icon: Icon(Icons.add_circle, size: 40), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
         ],
-      ),
-    );
-  }
-
-  /// WIDGET REUTILIZABLE PARA TARJETAS
-  Widget _buildNotificacionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF4A76B8),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.yellow, size: 40),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
