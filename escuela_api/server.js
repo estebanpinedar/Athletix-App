@@ -467,35 +467,24 @@ if (entrenador.rows.length > 0) {
 // ELIMINAR ESPACIO
 app.delete("/espacios/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.query; // 🔥 CAMBIO
+  const { id_usuario } = req.body; // ✅ NECESARIO
 
   try {
-    // 🔥 eliminar equipos primero (IMPORTANTE)
-    await db.execute({
-      sql: "DELETE FROM equipos WHERE id_espacio = ?",
-      args: [id],
-    });
-
     await db.execute({
       sql: "DELETE FROM espacios WHERE id_espacio = ?",
       args: [id],
     });
 
-    if (id_usuario) {
-      await db.execute({
-        sql: `
-          INSERT INTO notificaciones (id_usuario, mensaje)
-          VALUES (?, ?)
-        `,
-        args: [id_usuario, "Eliminaste un espacio"],
-      });
-    }
+    await crearNotificacion(
+      id_usuario,
+      "Eliminaste un espacio",
+      "espacio"
+    );
 
     res.json({ success: true });
 
   } catch (error) {
-    console.log("ERROR ELIMINAR ESPACIO:", error);
-    res.status(500).json({
+    res.json({
       success: false,
       error: error.message,
     });
@@ -790,14 +779,9 @@ app.put("/equipos/:id", async (req, res) => {
 //ELIMINAR EQUIPOS
 app.delete("/equipos/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.query; // 🔥 CAMBIO AQUÍ
+  const { id_usuario } = req.body; // ✅ AQUÍ
 
   try {
-    await db.execute({
-      sql: "DELETE FROM inscripcion WHERE id_equipo = ?",
-      args: [id],
-    });
-
     await db.execute({
       sql: "DELETE FROM horarios_equipo WHERE id_equipo = ?",
       args: [id],
@@ -808,21 +792,16 @@ app.delete("/equipos/:id", async (req, res) => {
       args: [id],
     });
 
-    // 🔔 NOTIFICACION
-    if (id_usuario) {
-      await db.execute({
-        sql: `
-          INSERT INTO notificaciones (id_usuario, mensaje)
-          VALUES (?, ?)
-        `,
-        args: [id_usuario, "Eliminaste un equipo"],
-      });
-    }
+    // 🔥 NOTIFICACIÓN DENTRO DEL TRY
+    await crearNotificacion(
+      id_usuario,
+      "Eliminaste un equipo",
+      "equipo"
+    );
 
     res.json({ success: true });
 
   } catch (error) {
-    console.log("ERROR ELIMINAR EQUIPO:", error);
     res.status(500).json({
       success: false,
       error: error.message,
