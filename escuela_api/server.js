@@ -856,13 +856,11 @@ app.post("/inscribir", async (req, res) => {
   const { id_equipo, id_usuario } = req.body;
 
   try {
-    // 1. contar inscritos
     const inscritos = await db.execute({
       sql: "SELECT COUNT(*) as total FROM inscripcion WHERE id_equipo = ?",
       args: [id_equipo],
     });
 
-    // 2. capacidad del equipo
     const equipo = await db.execute({
       sql: "SELECT capacidad_maxima FROM equipos WHERE id_equipo = ?",
       args: [id_equipo],
@@ -871,12 +869,10 @@ app.post("/inscribir", async (req, res) => {
     if (inscritos.rows[0].total >= equipo.rows[0].capacidad_maxima) {
       return res.json({
         success: false,
-        full: true,
         msg: "Equipo lleno",
       });
     }
 
-    // 3. insertar inscripción
     await db.execute({
       sql: `
         INSERT INTO inscripcion (id_equipo, id_usuario)
@@ -888,7 +884,7 @@ app.post("/inscribir", async (req, res) => {
     res.json({ success: true });
 
   } catch (e) {
-    res.json({ success: false, error: e.message });
+    res.json({ success: false, msg: e.message });
   }
 });
 

@@ -160,7 +160,14 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
         decoration: const InputDecoration(border: InputBorder.none),
         hint: Text(hint),
         items: items.map<DropdownMenuItem<int>>((e) {
-          return DropdownMenuItem(value: e[idKey], child: Text(e[textKey]));
+          print("ITEM: $e"); // 👈 DEBUG
+
+          return DropdownMenuItem<int>(
+            value: e[idKey] is int
+                ? e[idKey]
+                : int.tryParse(e[idKey].toString()),
+            child: Text(e[textKey]?.toString() ?? "Sin nombre"),
+          );
         }).toList(),
         onChanged: onChanged,
       ),
@@ -169,6 +176,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
   @override
   Widget build(BuildContext context) {
+    print("LISTA EQUIPOS: $equipos");
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
 
