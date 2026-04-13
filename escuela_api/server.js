@@ -467,6 +467,7 @@ if (entrenador.rows.length > 0) {
 // ELIMINAR ESPACIO
 app.delete("/espacios/:id", async (req, res) => {
   const { id } = req.params;
+  const { id_usuario } = req.body; // 🔥 IMPORTANTE
 
   try {
     await db.execute({
@@ -474,17 +475,25 @@ app.delete("/espacios/:id", async (req, res) => {
       args: [id],
     });
 
+    // 🔔 NOTIFICACION
+    if (id_usuario) {
+      await db.execute({
+        sql: `
+          INSERT INTO notificaciones (id_usuario, mensaje)
+          VALUES (?, ?)
+        `,
+        args: [id_usuario, "Eliminaste un espacio"],
+      });
+    }
+
     res.json({ success: true });
+
   } catch (error) {
     res.json({
       success: false,
       error: error.message,
     });
   }
-  await crearNotificacion(
-  idUsuario, // si lo tienes en frontend
-  "Eliminaste un espacio"
-);
 });
 
 //ESPACIOS POR DEPORTE (CON ENTRENADOR)
@@ -685,7 +694,8 @@ app.put("/equipos/:id", async (req, res) => {
     id_espacio,
     id_categoria,
     dias,
-    hora
+    hora,
+    id_usuario // 🔥 IMPORTANTE
   } = req.body;
 
   try {
@@ -717,7 +727,7 @@ app.put("/equipos/:id", async (req, res) => {
     const diasActuales = actual.rows.map(r => r.dia);
     const nuevosDias = dias || [];
 
-    // 3. eliminar los que ya no están
+    // 3. eliminar días quitados
     for (let dia of diasActuales) {
       if (!nuevosDias.includes(dia)) {
         await db.execute({
@@ -743,7 +753,7 @@ app.put("/equipos/:id", async (req, res) => {
       }
     }
 
-    // 5. actualizar hora en todos los registros del equipo
+    // 5. actualizar hora
     await db.execute({
       sql: `
         UPDATE horarios_equipo
@@ -753,33 +763,58 @@ app.put("/equipos/:id", async (req, res) => {
       args: [hora, id],
     });
 
+    // 🔔 NOTIFICACION (DENTRO DEL TRY)
+    if (id_usuario) {
+      await db.execute({
+        sql: `
+          INSERT INTO notificaciones (id_usuario, mensaje)
+          VALUES (?, ?)
+        `,
+        args: [id_usuario, "Modificaste un equipo"],
+      });
+    }
+
     res.json({ success: true });
 
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-  await crearNotificacion(
-  id_usuario,
-  "Modificaste un equipo"
-);
 });
 
 //ELIMINAR EQUIPOS
 app.delete("/equipos/:id", async (req, res) => {
   const { id } = req.params;
+  const { id_usuario } = req.body; // 🔥 IMPORTANTE
 
   try {
-    // 1. eliminar horarios primero
+    // 🔥 1. eliminar inscripciones primero (MUY IMPORTANTE)
+    await db.execute({
+      sql: "DELETE FROM inscripcion WHERE id_equipo = ?",
+      args: [id],
+    });
+
+    // 🔥 2. eliminar horarios
     await db.execute({
       sql: "DELETE FROM horarios_equipo WHERE id_equipo = ?",
       args: [id],
     });
 
-    // 2. eliminar equipo
+    // 🔥 3. eliminar equipo
     await db.execute({
       sql: "DELETE FROM equipos WHERE id_equipo = ?",
       args: [id],
     });
+
+    // 🔔 NOTIFICACION (BIEN UBICADA)
+    if (id_usuario) {
+      await db.execute({
+        sql: `
+          INSERT INTO notificaciones (id_usuario, mensaje)
+          VALUES (?, ?)
+        `,
+        args: [id_usuario, "Eliminaste un equipo"],
+      });
+    }
 
     res.json({ success: true });
 
@@ -789,10 +824,6 @@ app.delete("/equipos/:id", async (req, res) => {
       error: error.message,
     });
   }
-  await crearNotificacion(
-  id_usuario,
-  "Eliminaste un equipo"
-);
 });
 
 //ESPACIOS POR DEPORTE + ENTRENADOR
