@@ -574,11 +574,13 @@ app.post("/equipos", async (req, res) => {
     id_deporte,
     id_espacio,
     id_categoria,
-    id_usuario
+    id_usuario,
+    dias,   // 🔥 NUEVO
+    hora    // 🔥 NUEVO
   } = req.body;
 
   try {
-    // 🔥 convertir usuario → entrenador
+    // 🔥 1. convertir usuario → entrenador
     const entrenador = await db.execute({
       sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
       args: [id_usuario],
@@ -593,8 +595,8 @@ app.post("/equipos", async (req, res) => {
 
     const id_entrenador = entrenador.rows[0].id_entrenador;
 
-    // 🔥 insertar equipo
-    await db.execute({
+    // 🔥 2. insertar equipo
+    const result = await db.execute({
       sql: `
         INSERT INTO equipos
         (nombre, descripcion, capacidad_maxima, id_deporte, id_espacio, id_entrenador, id_categoria)
@@ -611,11 +613,29 @@ app.post("/equipos", async (req, res) => {
       ],
     });
 
+    const equipoId = result.lastInsertRowid;
+
+    // 🔥 3. insertar horarios (si vienen)
+    if (dias && dias.length > 0 && hora) {
+      for (let dia of dias) {
+        await db.execute({
+          sql: `
+            INSERT INTO horarios_equipo (id_equipo, dia, hora)
+            VALUES (?, ?, ?)
+          `,
+          args: [equipoId, dia, hora],
+        });
+      }
+    }
+
     res.json({ success: true });
 
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, error: error.message });
+    console.log("ERROR EQUIPO:", error);
+    res.json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 

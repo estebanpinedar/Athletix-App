@@ -74,43 +74,67 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
 
   /// 🔥 CONFIRMAR ELIMINACIÓN
   void mostrarDialogoEliminar(int idEquipo) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              "¿Eliminar este equipo?",
+              "¿Está seguro que quiere eliminar este equipo?",
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+
             const SizedBox(height: 20),
 
+            /// BOTÓN CONFIRMAR
             SizedBox(
               width: 220,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
-                  eliminarEquipo(idEquipo);
+                  eliminarEquipo(idEquipo); // 🔥 AQUÍ CAMBIA
                 },
-                child: const Text("Confirmar"),
+                child: const Text(
+                  "Confirmar",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
 
             const SizedBox(height: 10),
 
-            OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
+            /// BOTÓN CANCELAR
+            SizedBox(
+              width: 150,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancelar"),
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   /// 🔍 BUSCAR
   void filtrar(String texto) {

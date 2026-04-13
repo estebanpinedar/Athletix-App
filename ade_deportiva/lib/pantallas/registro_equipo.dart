@@ -12,6 +12,18 @@ class RegistroEquipo extends StatefulWidget {
 }
 
 class _RegistroEquipoState extends State<RegistroEquipo> {
+  List<String> dias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+
+  List<String> diasSeleccionados = [];
+
+  TimeOfDay? horaSeleccionada;
   final nombreController = TextEditingController();
   final descripcionController = TextEditingController();
   final capacidadController = TextEditingController();
@@ -49,7 +61,9 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
   Future<void> obtenerEspacios(int idDeporte) async {
     try {
       var res = await http.get(
-        Uri.parse("$baseUrl/espacios/deporte/$idDeporte/${widget.idUsuario}"),
+        Uri.parse(
+          "$baseUrl/espacios/deporte-entrenador/$idDeporte/${widget.idUsuario}",
+        ),
       );
 
       var data = json.decode(res.body);
@@ -82,11 +96,14 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
 
   /// 🔥 REGISTRAR EQUIPO
   Future<void> registrarEquipo() async {
+    // 🔥 VALIDACIONES
     if (nombreController.text.isEmpty ||
         deporteSeleccionado == null ||
         espacioSeleccionado == null ||
         categoriaSeleccionada == null ||
-        capacidadController.text.isEmpty) {
+        capacidadController.text.isEmpty ||
+        diasSeleccionados.isEmpty ||
+        horaSeleccionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Completa todos los campos")),
       );
@@ -104,18 +121,26 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
           "id_espacio": espacioSeleccionado,
           "id_categoria": categoriaSeleccionada,
           "capacidad_maxima": int.parse(capacidadController.text),
-          "id_usuario": widget.idUsuario, // 🔥 CORREGIDO
+          "id_usuario": widget.idUsuario,
+
+          // 🔥 HORARIO
+          "dias": diasSeleccionados,
+          "hora": horaSeleccionada!.format(context),
         }),
       );
 
       var data = json.decode(res.body);
 
       if (data["success"]) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Equipo registrado")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Equipo registrado correctamente")),
+        );
 
         Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["error"] ?? "Error al registrar")),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -223,6 +248,66 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
                 "Descripción",
                 descripcionController,
                 maxLines: 3,
+              ),
+
+              const SizedBox(height: 20),
+
+              /// 🔥 DÍAS DE ENTRENAMIENTO
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Días de entrenamiento",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              Column(
+                children: dias.map((dia) {
+                  return CheckboxListTile(
+                    title: Text(dia),
+                    value: diasSeleccionados.contains(dia),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value!) {
+                          diasSeleccionados.add(dia);
+                        } else {
+                          diasSeleccionados.remove(dia);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// 🔥 HORA
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
+                    final hora = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+
+                    if (hora != null) {
+                      setState(() {
+                        horaSeleccionada = hora;
+                      });
+                    }
+                  },
+                  child: Text(
+                    horaSeleccionada == null
+                        ? "Seleccionar hora"
+                        : "Hora: ${horaSeleccionada!.format(context)}",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 30),
