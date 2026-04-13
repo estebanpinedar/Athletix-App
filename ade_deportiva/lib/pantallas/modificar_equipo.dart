@@ -33,6 +33,8 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   final descripcionController = TextEditingController();
   final capacidadController = TextEditingController();
 
+  final String baseUrl = "https://escuela-deportiva-project.onrender.com";
+
   List deportes = [];
   List espacios = [];
   List categorias = [];
@@ -41,9 +43,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   int? espacioSeleccionado;
   int? categoriaSeleccionada;
 
-  final String baseUrl = "https://escuela-deportiva-project.onrender.com";
-
   /// 🔥 HORARIO
+  List<String> diasSeleccionados = [];
+  TimeOfDay? horaSeleccionada;
+
   List<String> dias = [
     "Lunes",
     "Martes",
@@ -52,9 +55,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     "Viernes",
     "Sábado",
   ];
-
-  List<String> diasSeleccionados = [];
-  TimeOfDay? horaSeleccionada;
 
   @override
   void initState() {
@@ -71,9 +71,43 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     obtenerDeportes();
     obtenerCategorias();
     obtenerEspacios(widget.idDeporte);
+
+    /// 🔥 CARGAR HORARIO REAL
+    cargarHorario();
   }
 
+  /// =========================
+  /// 🔥 CARGAR HORARIO (CLAVE)
+  /// =========================
+  Future<void> cargarHorario() async {
+    try {
+      var res = await http.get(
+        Uri.parse("$baseUrl/equipos/${widget.idEquipo}/horario"),
+      );
+
+      var data = json.decode(res.body);
+
+      if (data["success"]) {
+        setState(() {
+          diasSeleccionados = List<String>.from(data["dias"] ?? []);
+
+          if (data["hora"] != null) {
+            final parts = data["hora"].split(":");
+            horaSeleccionada = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      print("Error horario: $e");
+    }
+  }
+
+  /// =========================
   /// 🔥 DEPORTES
+  /// =========================
   Future<void> obtenerDeportes() async {
     var res = await http.get(Uri.parse("$baseUrl/deportes"));
     var data = json.decode(res.body);
@@ -85,7 +119,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     }
   }
 
+  /// =========================
   /// 🔥 ESPACIOS
+  /// =========================
   Future<void> obtenerEspacios(int idDeporte) async {
     var res = await http.get(
       Uri.parse(
@@ -102,7 +138,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     }
   }
 
+  /// =========================
   /// 🔥 CATEGORIAS
+  /// =========================
   Future<void> obtenerCategorias() async {
     var res = await http.get(Uri.parse("$baseUrl/categorias"));
     var data = json.decode(res.body);
@@ -114,19 +152,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     }
   }
 
+  /// =========================
   /// 🔥 MODIFICAR EQUIPO
+  /// =========================
   Future<void> modificarEquipo() async {
-    if (nombreController.text.isEmpty ||
-        deporteSeleccionado == null ||
-        espacioSeleccionado == null ||
-        categoriaSeleccionada == null ||
-        capacidadController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Completa todos los campos")),
-      );
-      return;
-    }
-
     try {
       var res = await http.put(
         Uri.parse("$baseUrl/equipos/${widget.idEquipo}"),
@@ -157,7 +186,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
         Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["error"] ?? "Error al modificar")),
+          SnackBar(content: Text(data["error"] ?? "Error")),
         );
       }
     } catch (e) {
@@ -176,6 +205,8 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+
+              /// 🔙 BACK
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
@@ -184,7 +215,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
                 ),
               ),
 
-              Image.asset("assets/images/logo.png", height: 150),
+              Image.asset("assets/images/logo.png", height: 140),
 
               const SizedBox(height: 10),
 
@@ -195,13 +226,13 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 30),
 
-              _input(Icons.groups, "Nombre del equipo", nombreController),
+              _input(Icons.groups, "Nombre", nombreController),
 
               const SizedBox(height: 20),
 
               _dropdown(
                 Icons.sports,
-                "Seleccionar deporte",
+                "Deporte",
                 deporteSeleccionado,
                 deportes,
                 (value) {
@@ -223,7 +254,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               _dropdown(
                 Icons.location_on,
-                "Seleccionar espacio",
+                "Espacio",
                 espacioSeleccionado,
                 espacios,
                 (value) {
@@ -255,7 +286,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               _input(
                 Icons.people,
-                "Capacidad máxima",
+                "Capacidad",
                 capacidadController,
                 isNumber: true,
               ),
@@ -306,12 +337,11 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () async {
                     final hora = await showTimePicker(
                       context: context,
-                      initialTime: TimeOfDay.now(),
+                      initialTime: horaSeleccionada ?? TimeOfDay.now(),
                     );
 
                     if (hora != null) {
@@ -336,21 +366,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: modificarEquipo,
-                  child: const Text(
-                    "Modificar",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: const Text("Modificar"),
                 ),
-              ),
-
-              const SizedBox(height: 15),
-
-              OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancelar"),
               ),
             ],
           ),
@@ -359,7 +378,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     );
   }
 
+  /// =========================
   /// 🔧 INPUT
+  /// =========================
   Widget _input(
     IconData icon,
     String hint,
@@ -367,36 +388,23 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     int maxLines = 1,
     bool isNumber = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.blue),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              keyboardType: isNumber
-                  ? TextInputType.number
-                  : TextInputType.text,
-              maxLines: maxLines,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: hint,
-              ),
-            ),
-          ),
-        ],
+    return TextField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon),
+        hintText: hint,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
 
+  /// =========================
   /// 🔧 DROPDOWN
+  /// =========================
   Widget _dropdown(
     IconData icon,
     String hint,
@@ -406,37 +414,21 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     String idKey,
     String textKey,
   ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade400),
+    return DropdownButtonFormField<int>(
+      value: items.any((e) => e[idKey] == value) ? value : null,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.blue),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              value: items.any((item) => item[idKey] == value)
-                  ? value
-                  : null,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: hint,
-              ),
-              items: items.map<DropdownMenuItem<int>>((item) {
-                return DropdownMenuItem(
-                  value: item[idKey],
-                  child: Text(item[textKey]),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ],
-      ),
+      items: items.map<DropdownMenuItem<int>>((item) {
+        return DropdownMenuItem(
+          value: item[idKey],
+          child: Text(item[textKey]),
+        );
+      }).toList(),
+      onChanged: onChanged,
     );
   }
 }

@@ -767,6 +767,35 @@ app.get("/categorias", async (req, res) => {
   }
 });
 
+app.get("/equipos/:id/horario", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT dia, hora
+        FROM horarios
+        WHERE id_equipo = ?
+      `,
+      args: [id],
+    });
+
+    const rows = result.rows;
+
+    const dias = rows.map(r => r.dia);
+    const hora = rows.length > 0 ? rows[0].hora : null;
+
+    res.json({
+      success: true,
+      dias,
+      hora,
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
