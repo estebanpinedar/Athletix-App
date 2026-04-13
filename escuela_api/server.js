@@ -642,13 +642,16 @@ app.post("/equipos", async (req, res) => {
 //MODIFICAR EQUIPOS
 app.put("/equipos/:id", async (req, res) => {
   const { id } = req.params;
+
   const {
     nombre,
     descripcion,
     capacidad_maxima,
     id_deporte,
     id_espacio,
-    id_categoria
+    id_categoria,
+    dias,
+    hora
   } = req.body;
 
   try {
@@ -656,7 +659,8 @@ app.put("/equipos/:id", async (req, res) => {
       sql: `
         UPDATE equipos
         SET nombre = ?, descripcion = ?, capacidad_maxima = ?, 
-            id_deporte = ?, id_espacio = ?, id_categoria = ?
+            id_deporte = ?, id_espacio = ?, id_categoria = ?,
+            dias = ?, hora = ?
         WHERE id_equipo = ?
       `,
       args: [
@@ -666,6 +670,8 @@ app.put("/equipos/:id", async (req, res) => {
         id_deporte,
         id_espacio,
         id_categoria,
+        dias,
+        hora,
         id
       ],
     });

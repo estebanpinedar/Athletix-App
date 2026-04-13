@@ -10,7 +10,7 @@ class ModificarEquipo extends StatefulWidget {
   final int idEspacio;
   final int idCategoria;
   final int capacidad;
-  final int idUsuario; // 🔥 AQUI
+  final int idUsuario;
 
   const ModificarEquipo({
     super.key,
@@ -21,7 +21,7 @@ class ModificarEquipo extends StatefulWidget {
     required this.idEspacio,
     required this.idCategoria,
     required this.capacidad,
-    required this.idUsuario, // 🔥 AQUI
+    required this.idUsuario,
   });
 
   @override
@@ -43,11 +43,23 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
   final String baseUrl = "https://escuela-deportiva-project.onrender.com";
 
+  /// 🔥 HORARIO
+  List<String> dias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+
+  List<String> diasSeleccionados = [];
+  TimeOfDay? horaSeleccionada;
+
   @override
   void initState() {
     super.initState();
 
-    /// 🔥 cargar datos iniciales
     nombreController.text = widget.nombre;
     descripcionController.text = widget.descripcion;
     capacidadController.text = widget.capacidad.toString();
@@ -58,7 +70,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
     obtenerDeportes();
     obtenerCategorias();
-    obtenerEspacios(widget.idDeporte); // 🔥 importante
+    obtenerEspacios(widget.idDeporte);
   }
 
   /// 🔥 DEPORTES
@@ -73,7 +85,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     }
   }
 
-  /// 🔥 ESPACIOS (POR DEPORTE)
+  /// 🔥 ESPACIOS
   Future<void> obtenerEspacios(int idDeporte) async {
     var res = await http.get(
       Uri.parse(
@@ -85,16 +97,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
     if (data["success"]) {
       setState(() {
-        espacios = (data["data"] as List).map((e) {
-          if (e is Map) {
-            return Map<String, dynamic>.from(e);
-          } else {
-            return {
-              "id_espacio": int.parse(e.toString()),
-              "nombre": e.toString(),
-            };
-          }
-        }).toList();
+        espacios = List<Map<String, dynamic>>.from(data["data"]);
       });
     }
   }
@@ -111,8 +114,19 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
     }
   }
 
-  /// 🔥 ACTUALIZAR EQUIPO
+  /// 🔥 MODIFICAR EQUIPO
   Future<void> modificarEquipo() async {
+    if (nombreController.text.isEmpty ||
+        deporteSeleccionado == null ||
+        espacioSeleccionado == null ||
+        categoriaSeleccionada == null ||
+        capacidadController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Completa todos los campos")),
+      );
+      return;
+    }
+
     try {
       var res = await http.put(
         Uri.parse("$baseUrl/equipos/${widget.idEquipo}"),
@@ -124,6 +138,12 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           "id_espacio": espacioSeleccionado,
           "id_categoria": categoriaSeleccionada,
           "capacidad_maxima": int.parse(capacidadController.text),
+
+          /// 🔥 HORARIO
+          "dias": jsonEncode(diasSeleccionados),
+          "hora": horaSeleccionada != null
+              ? "${horaSeleccionada!.hour.toString().padLeft(2, '0')}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
+              : null,
         }),
       );
 
@@ -136,14 +156,14 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Error al modificar")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["error"] ?? "Error al modificar")),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
   }
 
@@ -151,13 +171,11 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              /// 🔙 VOLVER
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
@@ -166,7 +184,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
                 ),
               ),
 
-              /// LOGO
               Image.asset("assets/images/logo.png", height: 150),
 
               const SizedBox(height: 10),
@@ -178,12 +195,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 30),
 
-              /// NOMBRE
               _input(Icons.groups, "Nombre del equipo", nombreController),
 
               const SizedBox(height: 20),
 
-              /// DEPORTE
               _dropdown(
                 Icons.sports,
                 "Seleccionar deporte",
@@ -206,7 +221,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 20),
 
-              /// ESPACIO
               _dropdown(
                 Icons.location_on,
                 "Seleccionar espacio",
@@ -223,7 +237,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 20),
 
-              /// CATEGORIA
               _dropdown(
                 Icons.category,
                 "Categoría",
@@ -240,7 +253,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 20),
 
-              /// CAPACIDAD
               _input(
                 Icons.people,
                 "Capacidad máxima",
@@ -250,7 +262,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
               const SizedBox(height: 20),
 
-              /// DESCRIPCIÓN
               _input(
                 Icons.description,
                 "Descripción",
@@ -258,9 +269,68 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
                 maxLines: 3,
               ),
 
+              const SizedBox(height: 20),
+
+              /// 🔥 DÍAS
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Días de entrenamiento",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              Column(
+                children: dias.map((dia) {
+                  return CheckboxListTile(
+                    title: Text(dia),
+                    value: diasSeleccionados.contains(dia),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          diasSeleccionados.add(dia);
+                        } else {
+                          diasSeleccionados.remove(dia);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// 🔥 HORA
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
+                    final hora = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+
+                    if (hora != null) {
+                      setState(() {
+                        horaSeleccionada = hora;
+                      });
+                    }
+                  },
+                  child: Text(
+                    horaSeleccionada == null
+                        ? "Seleccionar hora"
+                        : "Hora: ${horaSeleccionada!.format(context)}",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 30),
 
-              /// BOTÓN
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -349,7 +419,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonFormField<int>(
-              value: items.any((item) => item[idKey] == value) ? value : null,
+              value: items.any((item) => item[idKey] == value)
+                  ? value
+                  : null,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hint,
