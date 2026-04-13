@@ -674,6 +674,43 @@ app.delete("/equipos/:id", async (req, res) => {
   }
 });
 
+app.get("/espacios/deporte/:idDeporte/:idUsuario", async (req, res) => {
+  const { idDeporte, idUsuario } = req.params;
+
+  try {
+    // 🔥 convertir usuario → entrenador
+    const entrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [idUsuario],
+    });
+
+    if (entrenador.rows.length === 0) {
+      return res.json({ success: false });
+    }
+
+    const id_entrenador = entrenador.rows[0].id_entrenador;
+
+    // 🔥 traer espacios del entrenador + deporte
+    const espacios = await db.execute({
+      sql: `
+        SELECT id_espacio, nombre
+        FROM espacios
+        WHERE id_deporte = ? AND id_entrenador = ?
+      `,
+      args: [idDeporte, id_entrenador],
+    });
+
+    res.json({
+      success: true,
+      data: espacios.rows,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================

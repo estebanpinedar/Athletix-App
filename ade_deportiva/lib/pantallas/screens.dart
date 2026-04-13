@@ -18,3 +18,5 @@ export 'gestion_espacios.dart';
 export 'registro_espacio.dart';
 export 'modificar_espacio.dart';
 export 'equipos_entrenador.dart';
+export 'registro_equipo.dart';
+export 'modificar_equipo.dart';

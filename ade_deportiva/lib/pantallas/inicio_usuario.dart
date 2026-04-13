@@ -300,18 +300,25 @@ class _InicioUsuarioState extends State<InicioUsuario> {
 
                   const SizedBox(width: 15),
 
-                  /// RESUMEN
+                  /// RESUMEN / EQUIPOS
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        navegarRapido(
-                          context,
-                          Resumen(
-                            idUsuario: widget.idUsuario,
-                            nombreCompleto: widget.nombreCompleto,
-                            rol: widget.rol,
-                          ),
-                        );
+                        if (widget.rol == "entrenador") {
+                          navegarRapido(
+                            context,
+                            EquiposEntrenador(idUsuario: widget.idUsuario),
+                          );
+                        } else {
+                          navegarRapido(
+                            context,
+                            Resumen(
+                              idUsuario: widget.idUsuario,
+                              nombreCompleto: widget.nombreCompleto,
+                              rol: widget.rol,
+                            ),
+                          );
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(14),
@@ -323,18 +330,27 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset("assets/images/resumen.png", width: 60),
+                            Image.asset(
+                              widget.rol == "entrenador"
+                                  ? "assets/images/equipos.png"
+                                  : "assets/images/resumen.png",
+                              width: 60,
+                            ),
                             const Spacer(),
-                            const Text(
-                              "Resumen",
-                              style: TextStyle(
+                            Text(
+                              widget.rol == "entrenador"
+                                  ? "Equipos"
+                                  : "Resumen",
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
-                              "Ver tus próximas actividades",
-                              style: TextStyle(
+                            Text(
+                              widget.rol == "entrenador"
+                                  ? "Gestiona tus equipos"
+                                  : "Ver tus próximas actividades",
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12,
                               ),
@@ -416,7 +432,11 @@ class _InicioUsuarioState extends State<InicioUsuario> {
             if (widget.rol == "entrenador") {
               navegarRapido(
                 context,
-                RegistroEspacio(idUsuario: widget.idUsuario, nombreCompleto: widget.nombreCompleto, rol: widget.rol,),
+                RegistroEspacio(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
               );
             } else {
               navegarRapido(
