@@ -995,6 +995,62 @@ app.delete("/inscripcion", async (req, res) => {
   }
 });
 
+// 📅 ENTRENAMIENTOS POR USUARIO (ALUMNO)
+app.get("/calendario/usuario/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT 
+          e.nombre,
+          he.dia,
+          he.hora
+        FROM inscripcion i
+        JOIN equipos e ON i.id_equipo = e.id_equipo
+        JOIN horarios_equipo he ON e.id_equipo = he.id_equipo
+        WHERE i.id_usuario = ?
+      `,
+      args: [id],
+    });
+
+    res.json({ success: true, data: result.rows });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// 📅 ENTRENAMIENTOS POR ENTRENADOR
+app.get("/calendario/entrenador/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const entrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [id],
+    });
+
+    const id_entrenador = entrenador.rows[0].id_entrenador;
+
+    const result = await db.execute({
+      sql: `
+        SELECT 
+          e.nombre,
+          he.dia,
+          he.hora
+        FROM equipos e
+        JOIN horarios_equipo he ON e.id_equipo = he.id_equipo
+        WHERE e.id_entrenador = ?
+      `,
+      args: [id_entrenador],
+    });
+
+    res.json({ success: true, data: result.rows });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
