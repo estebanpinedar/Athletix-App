@@ -168,10 +168,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           "id_categoria": categoriaSeleccionada,
           "capacidad_maxima": int.parse(capacidadController.text),
 
-          /// 👇 AGREGAR ESTO
+          /// 🔥 ESTA ES LA CLAVE
           "id_usuario": widget.idUsuario,
 
-          /// HORARIO
           "dias": diasSeleccionados,
           "hora": horaSeleccionada != null
               ? "${horaSeleccionada!.hour.toString().padLeft(2, '0')}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
