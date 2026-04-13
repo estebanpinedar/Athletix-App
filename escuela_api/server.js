@@ -4,13 +4,17 @@ import dotenv from "dotenv";
 import { db } from "./db.js";
 
 async function crearNotificacion(id_usuario, mensaje) {
-  await db.execute({
-    sql: `
-      INSERT INTO notificaciones (id_usuario, mensaje, fecha)
-      VALUES (?, ?, datetime('now'))
-    `,
-    args: [id_usuario, mensaje],
-  });
+  try {
+    await db.execute({
+      sql: `
+        INSERT INTO notificaciones (id_usuario, mensaje, fecha, leida)
+        VALUES (?, ?, datetime('now', 'localtime'), 0)
+      `,
+      args: [id_usuario, mensaje],
+    });
+  } catch (e) {
+    console.log("ERROR CREAR NOTIFICACION:", e);
+  }
 }
 
 dotenv.config();
