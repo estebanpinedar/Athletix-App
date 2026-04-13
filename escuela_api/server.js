@@ -467,15 +467,20 @@ if (entrenador.rows.length > 0) {
 // ELIMINAR ESPACIO
 app.delete("/espacios/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.body; // 🔥 IMPORTANTE
+  const { id_usuario } = req.query; // 🔥 CAMBIO
 
   try {
+    // 🔥 eliminar equipos primero (IMPORTANTE)
+    await db.execute({
+      sql: "DELETE FROM equipos WHERE id_espacio = ?",
+      args: [id],
+    });
+
     await db.execute({
       sql: "DELETE FROM espacios WHERE id_espacio = ?",
       args: [id],
     });
 
-    // 🔔 NOTIFICACION
     if (id_usuario) {
       await db.execute({
         sql: `
@@ -489,7 +494,8 @@ app.delete("/espacios/:id", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    res.json({
+    console.log("ERROR ELIMINAR ESPACIO:", error);
+    res.status(500).json({
       success: false,
       error: error.message,
     });
@@ -784,28 +790,25 @@ app.put("/equipos/:id", async (req, res) => {
 //ELIMINAR EQUIPOS
 app.delete("/equipos/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.body; // 🔥 IMPORTANTE
+  const { id_usuario } = req.query; // 🔥 CAMBIO AQUÍ
 
   try {
-    // 🔥 1. eliminar inscripciones primero (MUY IMPORTANTE)
     await db.execute({
       sql: "DELETE FROM inscripcion WHERE id_equipo = ?",
       args: [id],
     });
 
-    // 🔥 2. eliminar horarios
     await db.execute({
       sql: "DELETE FROM horarios_equipo WHERE id_equipo = ?",
       args: [id],
     });
 
-    // 🔥 3. eliminar equipo
     await db.execute({
       sql: "DELETE FROM equipos WHERE id_equipo = ?",
       args: [id],
     });
 
-    // 🔔 NOTIFICACION (BIEN UBICADA)
+    // 🔔 NOTIFICACION
     if (id_usuario) {
       await db.execute({
         sql: `
@@ -819,6 +822,7 @@ app.delete("/equipos/:id", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
+    console.log("ERROR ELIMINAR EQUIPO:", error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -1138,27 +1142,34 @@ app.get("/calendario/entrenador/:id", async (req, res) => {
   }
 });
 
-//OBTENER NOTIFICACIONES
+// =========================
+// 🔔 OBTENER NOTIFICACIONES
+// =========================
 app.get("/notificaciones/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
 
   try {
     const result = await db.execute({
       sql: `
-        SELECT * FROM notificaciones
+        SELECT *
+        FROM notificaciones
         WHERE id_usuario = ?
-        ORDER BY id_notificacion DESC
+        ORDER BY fecha DESC
       `,
       args: [idUsuario],
     });
 
     res.json({
       success: true,
-      data: result.rows,
+      data: result.rows, // 🔥 IMPORTANTE
     });
 
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    console.log("ERROR NOTIFICACIONES:", error);
+    res.json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
