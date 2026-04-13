@@ -158,7 +158,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   Future<void> modificarEquipo() async {
     try {
       var res = await http.put(
-        Uri.parse("$baseUrl/equipos/${widget.idEquipo}"),
+        Uri.parse("$baseUrl/equipos/${widget.idEquipo}?id_usuario=${widget.idUsuario}"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "nombre": nombreController.text,

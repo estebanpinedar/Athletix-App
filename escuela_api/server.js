@@ -927,7 +927,7 @@ app.get("/equipos/:id/horario", async (req, res) => {
 
 //INSCRIPCIÓN + VALIDACIÓN CAPACIDAD
 app.post("/inscribir", async (req, res) => {
-  const { id_equipo, id_usuario } = req.body;
+  const id_usuario = req.query.id_usuario;
 
   try {
     const inscritos = await db.execute({
