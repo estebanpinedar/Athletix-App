@@ -68,7 +68,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
     );
 
     setState(() {
-      notificaciones.removeWhere((n) => n["id"] == id);
+      notificaciones.removeWhere((n) => n["id_notificacion"] == id);
     });
   }
 
@@ -238,10 +238,10 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                             final n = notificaciones[index];
 
                             return Dismissible(
-                              key: Key(n["id"].toString()),
+                              key: Key(n["id_notificacion"].toString()),
                               direction: DismissDirection.horizontal,
                               onDismissed: (direction) {
-                                eliminarNotificacion(n["id"]);
+                                eliminarNotificacion(n["id_notificacion"]);
                               },
 
                               child: Container(
@@ -264,7 +264,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                                 child: Row(
                                   children: [
                                     Icon(
-                                      obtenerIcono(n["tipo"] ?? ""),
+                                      Icons.notifications,
                                       color:
                                           obtenerColor(n["tipo"] ?? ""),
                                       size: 35,
