@@ -384,9 +384,9 @@ app.post("/espacios", async (req, res) => {
     res.json({ success: false, error: error.message });
   }
   await crearNotificacion(
-  id_usuario,
-  "Registraste un nuevo espacio deportivo"
-);
+    id_usuario,
+    "Registraste un nuevo espacio deportivo"
+  );
 });
 
 // 🔥 OBTENER ESPACIOS POR ENTRENADOR
@@ -451,17 +451,17 @@ app.put("/espacios/:id", async (req, res) => {
     });
   }
   // buscar entrenador
-const entrenador = await db.execute({
-  sql: "SELECT id_usuario FROM entrenadores WHERE id_entrenador = (SELECT id_entrenador FROM espacios WHERE id_espacio = ?)",
-  args: [id],
-});
+  const entrenador = await db.execute({
+    sql: "SELECT id_usuario FROM entrenadores WHERE id_entrenador = (SELECT id_entrenador FROM espacios WHERE id_espacio = ?)",
+    args: [id],
+  });
 
-if (entrenador.rows.length > 0) {
-  await crearNotificacion(
-    entrenador.rows[0].id_usuario,
-    "Modificaste un espacio"
-  );
-}
+  if (entrenador.rows.length > 0) {
+    await crearNotificacion(
+      entrenador.rows[0].id_usuario,
+      "Modificaste un espacio"
+    );
+  }
 });
 
 // ELIMINAR ESPACIO
@@ -674,9 +674,9 @@ app.post("/equipos", async (req, res) => {
     });
   }
   await crearNotificacion(
-  id_usuario,
-  "Creaste un nuevo equipo"
-);
+    id_usuario,
+    "Creaste un nuevo equipo"
+  );
 });
 
 //MODIFICAR EQUIPOS
@@ -720,6 +720,9 @@ app.put("/equipos/:id", async (req, res) => {
     // =========================
     // 2. HORARIOS
     // =========================
+    // =========================
+    // 2. HORARIOS (CORREGIDO)
+    // =========================
     const actual = await db.execute({
       sql: `SELECT dia FROM horarios_equipo WHERE id_equipo = ?`,
       args: [id],
@@ -738,21 +741,21 @@ app.put("/equipos/:id", async (req, res) => {
       }
     }
 
-    // insertar nuevos
-    for (let dia of nuevosDias) {
-      if (!diasActuales.includes(dia)) {
-        await db.execute({
-          sql: `
-            INSERT INTO horarios_equipo (id_equipo, dia, hora)
-            VALUES (?, ?, ?)
-          `,
-          args: [id, dia, hora],
-        });
-      }
-    }
-
-    // actualizar hora
+    // 🔥 SOLO insertar si hay hora válida
     if (hora) {
+      for (let dia of nuevosDias) {
+        if (!diasActuales.includes(dia)) {
+          await db.execute({
+            sql: `
+          INSERT INTO horarios_equipo (id_equipo, dia, hora)
+          VALUES (?, ?, ?)
+        `,
+            args: [id, dia, hora],
+          });
+        }
+      }
+
+      // actualizar hora existente
       await db.execute({
         sql: `UPDATE horarios_equipo SET hora = ? WHERE id_equipo = ?`,
         args: [hora, id],
@@ -1060,18 +1063,18 @@ app.delete("/inscripcion", async (req, res) => {
 
   try {
     await db.execute({
-  sql: `
+      sql: `
     DELETE FROM inscripcion
     WHERE id_usuario = ? AND id_equipo = ?
   `,
-  args: [id_usuario, id_equipo],
-});
+      args: [id_usuario, id_equipo],
+    });
 
-// 🔔 NOTIFICACIÓN
-await crearNotificacion(
-  id_usuario,
-  "Te diste de baja de un equipo"
-);
+    // 🔔 NOTIFICACIÓN
+    await crearNotificacion(
+      id_usuario,
+      "Te diste de baja de un equipo"
+    );
 
     res.json({ success: true });
 
