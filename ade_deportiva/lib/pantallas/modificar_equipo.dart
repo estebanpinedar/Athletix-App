@@ -169,7 +169,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           "capacidad_maxima": int.parse(capacidadController.text),
 
           /// 🔥 HORARIO
-          "dias": jsonEncode(diasSeleccionados),
+          "dias": diasSeleccionados,
           "hora": horaSeleccionada != null
               ? "${horaSeleccionada!.hour.toString().padLeft(2, '0')}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
               : null,

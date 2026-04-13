@@ -731,6 +731,13 @@ app.delete("/equipos/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
+    // 1. eliminar horarios primero
+    await db.execute({
+      sql: "DELETE FROM horarios_equipo WHERE id_equipo = ?",
+      args: [id],
+    });
+
+    // 2. eliminar equipo
     await db.execute({
       sql: "DELETE FROM equipos WHERE id_equipo = ?",
       args: [id],
@@ -739,7 +746,10 @@ app.delete("/equipos/:id", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
