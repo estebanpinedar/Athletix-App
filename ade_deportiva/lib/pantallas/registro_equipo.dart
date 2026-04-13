@@ -54,6 +54,8 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
 
       var data = json.decode(res.body);
 
+      print("ESPACIOS => $data"); // 🔥 AQUI
+
       if (data["success"]) {
         setState(() {
           espacios = data["data"];
@@ -68,6 +70,8 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
   Future<void> obtenerCategorias() async {
     var res = await http.get(Uri.parse("$baseUrl/categorias"));
     var data = json.decode(res.body);
+
+    print("CATEGORIAS => $data"); // 🔥 AQUÍ VA
 
     if (data["success"]) {
       setState(() {
@@ -100,7 +104,7 @@ class _RegistroEquipoState extends State<RegistroEquipo> {
           "id_espacio": espacioSeleccionado,
           "id_categoria": categoriaSeleccionada,
           "capacidad_maxima": int.parse(capacidadController.text),
-          "id_entrenador": widget.idUsuario,
+          "id_usuario": widget.idUsuario, // 🔥 CORREGIDO
         }),
       );
 

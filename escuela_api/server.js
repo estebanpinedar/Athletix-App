@@ -457,35 +457,6 @@ app.delete("/espacios/:id", async (req, res) => {
   }
 });
 
-//ESPACIOS POR DEPORTE (CON ENTRENADOR)
-app.get("/espacios/deporte/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const result = await db.execute({
-      sql: `
-        SELECT 
-          e.id_espacio, 
-          e.nombre, 
-          u.nombre as entrenador
-        FROM espacios e
-        JOIN entrenadores en ON e.id_entrenador = en.id_entrenador
-        JOIN usuarios u ON en.id_usuario = u.id_usuario
-        WHERE e.id_deporte = ?
-      `,
-      args: [id],
-    });
-
-    res.json(result.rows);
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
 //GUARDAR ENTRENAMIENTO
 app.post("/entrenamientos", async (req, res) => {
   const { id_deporte, id_espacio, fecha, hora } = req.body;

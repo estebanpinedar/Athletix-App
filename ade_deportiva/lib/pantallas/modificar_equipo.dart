@@ -27,7 +27,6 @@ class ModificarEquipo extends StatefulWidget {
 }
 
 class _ModificarEquipoState extends State<ModificarEquipo> {
-
   final nombreController = TextEditingController();
   final descripcionController = TextEditingController();
   final capacidadController = TextEditingController();
@@ -74,15 +73,22 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
   /// 🔥 ESPACIOS (POR DEPORTE)
   Future<void> obtenerEspacios(int idDeporte) async {
-    var res = await http.get(
-      Uri.parse("$baseUrl/espacios/deporte/$idDeporte"),
-    );
+    var res = await http.get(Uri.parse("$baseUrl/espacios/deporte/$idDeporte"));
 
     var data = json.decode(res.body);
 
     if (data["success"]) {
       setState(() {
-        espacios = data["data"];
+        espacios = (data["data"] as List).map((e) {
+          if (e is Map) {
+            return Map<String, dynamic>.from(e);
+          } else {
+            return {
+              "id_espacio": int.parse(e.toString()),
+              "nombre": e.toString(),
+            };
+          }
+        }).toList();
       });
     }
   }
@@ -124,15 +130,14 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error al modificar")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Error al modificar")));
       }
-
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -146,7 +151,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-
               /// 🔙 VOLVER
               Align(
                 alignment: Alignment.centerLeft,
@@ -231,14 +235,22 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
               const SizedBox(height: 20),
 
               /// CAPACIDAD
-              _input(Icons.people, "Capacidad máxima", capacidadController,
-                  isNumber: true),
+              _input(
+                Icons.people,
+                "Capacidad máxima",
+                capacidadController,
+                isNumber: true,
+              ),
 
               const SizedBox(height: 20),
 
               /// DESCRIPCIÓN
-              _input(Icons.description, "Descripción", descripcionController,
-                  maxLines: 3),
+              _input(
+                Icons.description,
+                "Descripción",
+                descripcionController,
+                maxLines: 3,
+              ),
 
               const SizedBox(height: 30),
 
@@ -272,8 +284,13 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   }
 
   /// 🔧 INPUT
-  Widget _input(IconData icon, String hint, TextEditingController controller,
-      {int maxLines = 1, bool isNumber = false}) {
+  Widget _input(
+    IconData icon,
+    String hint,
+    TextEditingController controller, {
+    int maxLines = 1,
+    bool isNumber = false,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -288,8 +305,9 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           Expanded(
             child: TextField(
               controller: controller,
-              keyboardType:
-                  isNumber ? TextInputType.number : TextInputType.text,
+              keyboardType: isNumber
+                  ? TextInputType.number
+                  : TextInputType.text,
               maxLines: maxLines,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -325,7 +343,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonFormField<int>(
-              value: value,
+              value: items.any((item) => item[idKey] == value) ? value : null,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hint,
