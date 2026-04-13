@@ -54,6 +54,8 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
       var response = await http.delete(url);
       var data = json.decode(response.body);
 
+      print("DELETE RESPONSE => $data"); // 🔥 IMPORTANTE
+
       if (data["success"] == true) {
         ScaffoldMessenger.of(
           context,
@@ -61,11 +63,12 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
 
         obtenerEquipos();
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Error al eliminar")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["error"] ?? "Error backend")),
+        );
       }
     } catch (e) {
+      print("ERROR DELETE => $e"); // 🔥 IMPORTANTE
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -74,67 +77,64 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
 
   /// 🔥 CONFIRMAR ELIMINACIÓN
   void mostrarDialogoEliminar(int idEquipo) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "¿Está seguro que quiere eliminar este equipo?",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "¿Está seguro que quiere eliminar este equipo?",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            /// BOTÓN CONFIRMAR
-            SizedBox(
-              width: 220,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              /// BOTÓN CONFIRMAR
+              SizedBox(
+                width: 220,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    eliminarEquipo(idEquipo); // 🔥 AQUÍ CAMBIA
+                  },
+                  child: const Text(
+                    "Confirmar",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  eliminarEquipo(idEquipo); // 🔥 AQUÍ CAMBIA
-                },
-                child: const Text(
-                  "Confirmar",
-                  style: TextStyle(color: Colors.white),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// BOTÓN CANCELAR
+              SizedBox(
+                width: 150,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancelar"),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// BOTÓN CANCELAR
-            SizedBox(
-              width: 150,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Cancelar"),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   /// 🔍 BUSCAR
   void filtrar(String texto) {
@@ -230,7 +230,8 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
                                         idEspacio: equipo["id_espacio"],
                                         idCategoria: equipo["id_categoria"],
                                         capacidad: equipo["capacidad_maxima"],
-                                        idUsuario: widget.idUsuario, // 🔥 ESTE ES CLAVE
+                                        idUsuario: widget
+                                            .idUsuario, // 🔥 ESTE ES CLAVE
                                       ),
                                     );
                                   } else if (value == "eliminar") {

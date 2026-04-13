@@ -15,264 +15,290 @@ class RegistrarEntrenamiento extends StatefulWidget {
   });
 
   @override
-  State<RegistrarEntrenamiento> createState() => _RegistrarEntrenamientoState();
+  State<RegistrarEntrenamiento> createState() =>
+      _RegistrarEntrenamientoState();
 }
 
 class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
-  int? idDeporte;
-  int? idEspacio;
+  final String api =
+      "https://escuela-deportiva-project.onrender.com";
 
-  DateTime? fechaSeleccionada;
-  TimeOfDay? horaSeleccionada;
+  int? idDeporte;
+  int? idCategoria;
+  int? idEquipo;
 
   List deportes = [];
-  List espacios = [];
+  List categorias = [];
+  List equipos = [];
 
-  final String api =
-      "https://escuela-deportiva-project.onrender.com"; // 🔥 CAMBIA
+  Map<String, dynamic>? equipoSeleccionado;
+  List<String> dias = [];
+  String? hora;
+  bool grupoLleno = false;
 
   @override
   void initState() {
     super.initState();
     obtenerDeportes();
+    obtenerCategorias();
   }
 
-  /// 🔥 OBTENER DEPORTES
+  /// =========================
+  /// DEPORTES
+  /// =========================
   Future<void> obtenerDeportes() async {
     var res = await http.get(Uri.parse("$api/deportes"));
     var data = json.decode(res.body);
 
-    print("RESPUESTA: $data"); // 🔥 debug
-
     setState(() {
-      deportes = data["deportes"]; // 🔥 CORRECTO
+      deportes = data["deportes"];
     });
   }
 
-  /// 🔥 OBTENER ESPACIOS POR DEPORTE
-  Future<void> obtenerEspacios(int idDep) async {
-    var res = await http.get(Uri.parse("$api/espacios/deporte/$idDep"));
+  /// =========================
+  /// CATEGORIAS
+  /// =========================
+  Future<void> obtenerCategorias() async {
+    var res = await http.get(Uri.parse("$api/categorias"));
     var data = json.decode(res.body);
 
     setState(() {
-      espacios = data;
+      categorias = data["categorias"];
     });
   }
 
-  /// 🔥 GUARDAR ENTRENAMIENTO
-  Future<void> guardar() async {
-    if (idDeporte == null ||
-        idEspacio == null ||
-        fechaSeleccionada == null ||
-        horaSeleccionada == null) {
+  /// =========================
+  /// EQUIPOS FILTRADOS
+  /// =========================
+  Future<void> obtenerEquipos() async {
+    if (idDeporte == null || idCategoria == null) return;
+
+    var res = await http.get(Uri.parse(
+        "$api/equipos/filtrados?deporte=$idDeporte&categoria=$idCategoria"));
+
+    var data = json.decode(res.body);
+
+    setState(() {
+      equipos = data["data"] ?? [];
+      idEquipo = null;
+      equipoSeleccionado = null;
+      dias = [];
+      hora = null;
+      grupoLleno = false;
+    });
+  }
+
+  /// =========================
+  /// HORARIO EQUIPO
+  /// =========================
+  Future<void> obtenerHorario(int id) async {
+    var res = await http.get(
+      Uri.parse("$api/equipos/$id/horario"),
+    );
+
+    var data = json.decode(res.body);
+
+    setState(() {
+      dias = List<String>.from(data["dias"] ?? []);
+      hora = data["hora"];
+    });
+  }
+
+  /// =========================
+  /// VERIFICAR CAPACIDAD
+  /// =========================
+  Future<void> verificarEquipo(int id) async {
+    var res = await http.get(Uri.parse("$api/equipos/$id"));
+    var data = json.decode(res.body);
+
+    setState(() {
+      grupoLleno = data["inscritos"] >= data["capacidad_maxima"];
+    });
+  }
+
+  /// =========================
+  /// INSCRIBIR
+  /// =========================
+  Future<void> inscribirse() async {
+    if (grupoLleno) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Completa todos los campos")),
+        const SnackBar(content: Text("❌ El grupo está lleno")),
       );
       return;
     }
 
     var res = await http.post(
-      Uri.parse("$api/entrenamientos"),
+      Uri.parse("$api/inscripciones"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "id_deporte": idDeporte,
-        "id_espacio": idEspacio,
-        "fecha": fechaSeleccionada.toString().split(" ")[0],
-        "hora":
-            "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
+        "id_usuario": widget.idUsuario,
+        "id_equipo": idEquipo,
       }),
     );
 
     var data = json.decode(res.body);
 
     if (data["success"]) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Entrenamiento registrado")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Inscripción realizada")),
+      );
       Navigator.pop(context);
     }
   }
 
-  /// 🎨 FECHA BONITA
-  String formatoFecha() {
-    if (fechaSeleccionada == null) return "Seleccionar fecha";
-    return "${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}";
-  }
-
-  /// 🎨 HORA BONITA
-  String formatoHora() {
-    if (horaSeleccionada == null) return "Seleccionar hora";
-    return "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}";
-  }
-
-  Future<void> seleccionarFecha() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(primary: Colors.blue),
-          ),
-          child: child!,
-        );
-      },
+  /// =========================
+  /// UI INPUT
+  /// =========================
+  Widget _dropdown(
+    String hint,
+    int? value,
+    List items,
+    String idKey,
+    String textKey,
+    Function(int?) onChanged,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonFormField<int>(
+        value: value,
+        decoration: const InputDecoration(border: InputBorder.none),
+        hint: Text(hint),
+        items: items.map<DropdownMenuItem<int>>((e) {
+          return DropdownMenuItem(
+            value: e[idKey],
+            child: Text(e[textKey]),
+          );
+        }).toList(),
+        onChanged: onChanged,
+      ),
     );
-
-    if (picked != null) {
-      setState(() => fechaSeleccionada = picked);
-    }
-  }
-
-  Future<void> seleccionarHora() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (picked != null) {
-      setState(() => horaSeleccionada = picked);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+
+              /// 🔙 BACK
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+
               Image.asset("assets/images/logo.png", height: 140),
 
               const SizedBox(height: 10),
 
               const Text(
-                "Nuevo Entrenamiento",
+                "Inscribirse a Equipo",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 25),
 
-              /// 🔥 DEPORTE
-              DropdownButtonFormField<int>(
-                value: idDeporte,
-                hint: const Text("Seleccionar deporte"),
-                items: deportes.map<DropdownMenuItem<int>>((d) {
-                  return DropdownMenuItem<int>(
-                    value: d["id_deporte"],
-                    child: Text(d["nombre"]),
-                  );
-                }).toList(),
-                onChanged: (value) {
+              /// DEPORTE
+              _dropdown(
+                "Deporte",
+                idDeporte,
+                deportes,
+                "id_deporte",
+                "nombre",
+                (v) {
                   setState(() {
-                    idDeporte = value;
-                    idEspacio = null;
-                    espacios = [];
+                    idDeporte = v;
+                    idCategoria = null;
+                    equipos = [];
+                  });
+                },
+              ),
+
+              const SizedBox(height: 15),
+
+              /// CATEGORIA
+              _dropdown(
+                "Categoría",
+                idCategoria,
+                categorias,
+                "id_categoria",
+                "nombre",
+                (v) {
+                  setState(() {
+                    idCategoria = v;
+                  });
+                  obtenerEquipos();
+                },
+              ),
+
+              const SizedBox(height: 15),
+
+              /// EQUIPOS
+              _dropdown(
+                "Equipo",
+                idEquipo,
+                equipos,
+                "id_equipo",
+                "nombre",
+                (v) async {
+                  setState(() {
+                    idEquipo = v;
+                    equipoSeleccionado = equipos
+                        .firstWhere((e) => e["id_equipo"] == v);
                   });
 
-                  if (value != null) {
-                    obtenerEspacios(value);
-                  }
+                  await obtenerHorario(v!);
+                  await verificarEquipo(v);
                 },
               ),
 
               const SizedBox(height: 20),
 
-              /// 🔥 ESPACIO (DINÁMICO)
-              if (idDeporte != null)
-                DropdownButtonFormField<int>(
-                  value: idEspacio,
-                  hint: const Text("Seleccionar espacio"),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey.shade200,
-                    prefixIcon: const Icon(Icons.location_on),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  items: espacios.map<DropdownMenuItem<int>>((e) {
-                    return DropdownMenuItem(
-                      value: e["id_espacio"],
-                      child: Text("${e["nombre"]} - ${e["entrenador"]}"),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      idEspacio = value;
-                    });
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              /// 🔥 FECHA (MEJORADA)
-              GestureDetector(
-                onTap: seleccionarFecha,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
+              /// HORARIO
+              if (dias.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade400),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.calendar_today, color: Colors.blue),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          fechaSeleccionada == null
-                              ? "Seleccionar fecha"
-                              : "${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}",
-                        ),
-                      ),
+                      const Text("Horario:",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text("Días: ${dias.join(", ")}"),
+                      Text("Hora: $hora"),
                     ],
                   ),
                 ),
-              ),
 
               const SizedBox(height: 20),
 
-              /// 🔥 HORA (MEJORADA)
-              GestureDetector(
-                onTap: seleccionarHora,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.access_time, color: Colors.blue),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          horaSeleccionada == null
-                              ? "Seleccionar hora"
-                              : "${horaSeleccionada!.hour}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}",
-                        ),
-                      ),
-                    ],
-                  ),
+              /// ESTADO GRUPO
+              if (grupoLleno)
+                const Text(
+                  "⚠️ El grupo está lleno",
+                  style: TextStyle(color: Colors.red),
                 ),
-              ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-              /// 🔥 BOTÓN
+              /// BOTÓN
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -280,11 +306,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                     backgroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed: guardar,
-                  child: const Text(
-                    "Confirmar",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  onPressed: inscribirse,
+                  child: const Text("Confirmar",
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
 
@@ -300,6 +324,4 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
       ),
     );
   }
-  
 }
-

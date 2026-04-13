@@ -851,6 +851,71 @@ app.get("/equipos/:id/horario", async (req, res) => {
   }
 });
 
+//INSCRIPCIÓN + VALIDACIÓN CAPACIDAD
+app.post("/inscribir", async (req, res) => {
+  const { id_equipo, id_usuario } = req.body;
+
+  try {
+    // 1. contar inscritos
+    const inscritos = await db.execute({
+      sql: "SELECT COUNT(*) as total FROM inscripciones WHERE id_equipo = ?",
+      args: [id_equipo],
+    });
+
+    // 2. capacidad del equipo
+    const equipo = await db.execute({
+      sql: "SELECT capacidad_maxima FROM equipos WHERE id_equipo = ?",
+      args: [id_equipo],
+    });
+
+    if (inscritos.rows[0].total >= equipo.rows[0].capacidad_maxima) {
+      return res.json({
+        success: false,
+        full: true,
+        msg: "Equipo lleno",
+      });
+    }
+
+    // 3. insertar inscripción
+    await db.execute({
+      sql: `
+        INSERT INTO inscripciones (id_equipo, id_usuario)
+        VALUES (?, ?)
+      `,
+      args: [id_equipo, id_usuario],
+    });
+
+    res.json({ success: true });
+
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+//EQUIPOS FILTRADOS
+app.get("/equipos/disponibles/:deporte/:categoria", async (req, res) => {
+  const { deporte, categoria } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT e.*,
+        COUNT(i.id) as inscritos
+        FROM equipos e
+        LEFT JOIN inscripciones i ON e.id_equipo = i.id_equipo
+        WHERE e.id_deporte = ? AND e.id_categoria = ?
+        GROUP BY e.id_equipo
+      `,
+      args: [deporte, categoria],
+    });
+
+    res.json({ success: true, data: result.rows });
+
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
