@@ -655,12 +655,12 @@ app.put("/equipos/:id", async (req, res) => {
   } = req.body;
 
   try {
+    // 1. actualizar equipo
     await db.execute({
       sql: `
         UPDATE equipos
         SET nombre = ?, descripcion = ?, capacidad_maxima = ?, 
-            id_deporte = ?, id_espacio = ?, id_categoria = ?,
-            dias = ?, hora = ?
+            id_deporte = ?, id_espacio = ?, id_categoria = ?
         WHERE id_equipo = ?
       `,
       args: [
@@ -670,16 +670,36 @@ app.put("/equipos/:id", async (req, res) => {
         id_deporte,
         id_espacio,
         id_categoria,
-        dias,
-        hora,
         id
       ],
     });
 
+    // 2. borrar horarios anteriores
+    await db.execute({
+      sql: `DELETE FROM horarios_equipo WHERE id_equipo = ?`,
+      args: [id],
+    });
+
+    // 3. insertar nuevos horarios
+    if (dias && dias.length > 0 && hora) {
+      for (let dia of dias) {
+        await db.execute({
+          sql: `
+            INSERT INTO horarios_equipo (id_equipo, dia, hora)
+            VALUES (?, ?, ?)
+          `,
+          args: [id, dia, hora],
+        });
+      }
+    }
+
     res.json({ success: true });
 
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
@@ -774,7 +794,7 @@ app.get("/equipos/:id/horario", async (req, res) => {
     const result = await db.execute({
       sql: `
         SELECT dia, hora
-        FROM horarios
+        FROM horarios_equipo
         WHERE id_equipo = ?
       `,
       args: [id],
@@ -783,16 +803,18 @@ app.get("/equipos/:id/horario", async (req, res) => {
     const rows = result.rows;
 
     const dias = rows.map(r => r.dia);
-    const hora = rows.length > 0 ? rows[0].hora : null;
 
     res.json({
       success: true,
       dias,
-      hora,
+      hora: rows.length > 0 ? rows[0].hora : null,
     });
 
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
