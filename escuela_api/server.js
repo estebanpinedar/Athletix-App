@@ -858,7 +858,7 @@ app.post("/inscribir", async (req, res) => {
   try {
     // 1. contar inscritos
     const inscritos = await db.execute({
-      sql: "SELECT COUNT(*) as total FROM inscripciones WHERE id_equipo = ?",
+      sql: "SELECT COUNT(*) as total FROM inscripcion WHERE id_equipo = ?",
       args: [id_equipo],
     });
 
@@ -879,7 +879,7 @@ app.post("/inscribir", async (req, res) => {
     // 3. insertar inscripción
     await db.execute({
       sql: `
-        INSERT INTO inscripciones (id_equipo, id_usuario)
+        INSERT INTO inscripcion (id_equipo, id_usuario)
         VALUES (?, ?)
       `,
       args: [id_equipo, id_usuario],
@@ -904,7 +904,7 @@ app.get("/equipos/disponibles/:deporte/:categoria", async (req, res) => {
           e.*,
           COUNT(i.id_inscripcion) as inscritos
         FROM equipos e
-        LEFT JOIN inscripciones i 
+        LEFT JOIN inscripcion i 
           ON e.id_equipo = i.id_equipo
         WHERE e.id_deporte = ? 
           AND e.id_categoria = ?
@@ -913,17 +913,11 @@ app.get("/equipos/disponibles/:deporte/:categoria", async (req, res) => {
       args: [deporte, categoria],
     });
 
-    res.json({ 
-      success: true, 
-      data: result.rows 
-    });
+    res.json({ success: true, data: result.rows });
 
   } catch (e) {
     console.log("ERROR EQUIPOS DISPONIBLES:", e);
-    res.json({ 
-      success: false, 
-      error: e.message 
-    });
+    res.json({ success: false, error: e.message });
   }
 });
 
@@ -936,7 +930,7 @@ app.get("/equipos/filtrados", async (req, res) => {
         SELECT e.*, 
         COUNT(i.id_equipo) as inscritos
         FROM equipos e
-        LEFT JOIN inscripciones i 
+        LEFT JOIN inscripcion i 
         ON e.id_equipo = i.id_equipo
         WHERE e.id_deporte = ?
         AND e.id_categoria = ?

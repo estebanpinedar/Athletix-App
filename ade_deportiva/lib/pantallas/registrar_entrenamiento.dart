@@ -15,8 +15,7 @@ class RegistrarEntrenamiento extends StatefulWidget {
   });
 
   @override
-  State<RegistrarEntrenamiento> createState() =>
-      _RegistrarEntrenamientoState();
+  State<RegistrarEntrenamiento> createState() => _RegistrarEntrenamientoState();
 }
 
 class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
@@ -72,11 +71,15 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
   Future<void> obtenerEquipos() async {
     if (idDeporte == null || idCategoria == null) return;
 
+    print("URL: $api/equipos/disponibles/$idDeporte/$idCategoria"); // 👈 AQUÍ
+
     var res = await http.get(
       Uri.parse("$api/equipos/disponibles/$idDeporte/$idCategoria"),
     );
 
     var data = json.decode(res.body);
+
+    print("Respuesta: $data"); // 👈 AQUÍ
 
     setState(() {
       equipos = data["data"] ?? [];
@@ -91,9 +94,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
   // HORARIO EQUIPO
   // =========================
   Future<void> obtenerHorario(int id) async {
-    var res = await http.get(
-      Uri.parse("$api/equipos/$id/horario"),
-    );
+    var res = await http.get(Uri.parse("$api/equipos/$id/horario"));
 
     var data = json.decode(res.body);
 
@@ -110,32 +111,29 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     if (idEquipo == null) return;
 
     if (grupoLleno) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ El grupo está lleno")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("❌ El grupo está lleno")));
       return;
     }
 
     var res = await http.post(
       Uri.parse("$api/inscribir"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "id_usuario": widget.idUsuario,
-        "id_equipo": idEquipo,
-      }),
+      body: jsonEncode({"id_usuario": widget.idUsuario, "id_equipo": idEquipo}),
     );
 
     var data = json.decode(res.body);
 
     if (data["success"] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Inscripción exitosa")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Inscripción exitosa")));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data["msg"] ?? "Error")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(data["msg"] ?? "Error")));
     }
   }
 
@@ -162,10 +160,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
         decoration: const InputDecoration(border: InputBorder.none),
         hint: Text(hint),
         items: items.map<DropdownMenuItem<int>>((e) {
-          return DropdownMenuItem(
-            value: e[idKey],
-            child: Text(e[textKey]),
-          );
+          return DropdownMenuItem(value: e[idKey], child: Text(e[textKey]));
         }).toList(),
         onChanged: onChanged,
       ),
@@ -182,7 +177,6 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-
               /// BACK
               Align(
                 alignment: Alignment.centerLeft,
@@ -204,21 +198,19 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               const SizedBox(height: 25),
 
               /// DEPORTE
-              dropdown(
-                "Deporte",
-                idDeporte,
-                deportes,
-                "id_deporte",
-                "nombre",
-                (v) {
-                  setState(() {
-                    idDeporte = v;
-                    idCategoria = null;
-                    equipos = [];
-                    idEquipo = null;
-                  });
-                },
-              ),
+              dropdown("Deporte", idDeporte, deportes, "id_deporte", "nombre", (
+                v,
+              ) {
+                setState(() {
+                  idDeporte = v;
+                  equipos = [];
+                  idEquipo = null;
+                });
+
+                if (idDeporte != null && idCategoria != null) {
+                  obtenerEquipos();
+                }
+              }),
 
               const SizedBox(height: 15),
 
@@ -236,6 +228,10 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                     idEquipo = null;
                   });
 
+                  print(
+                    "Deporte: $idDeporte - Categoria: $idCategoria",
+                  ); // 👈 AQUÍ
+
                   if (idDeporte != null && idCategoria != null) {
                     obtenerEquipos();
                   }
@@ -245,22 +241,17 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               const SizedBox(height: 15),
 
               /// EQUIPOS
-              dropdown(
-                "Equipo",
-                idEquipo,
-                equipos,
-                "id_equipo",
-                "nombre",
-                (v) async {
-                  setState(() {
-                    idEquipo = v;
-                  });
+              dropdown("Equipo", idEquipo, equipos, "id_equipo", "nombre", (
+                v,
+              ) async {
+                setState(() {
+                  idEquipo = v;
+                });
 
-                  if (v != null) {
-                    await obtenerHorario(v);
-                  }
-                },
-              ),
+                if (v != null) {
+                  await obtenerHorario(v);
+                }
+              }),
 
               const SizedBox(height: 20),
 
