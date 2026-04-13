@@ -201,12 +201,12 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
                                       ModificarEquipo(
                                         idEquipo: equipo["id_equipo"],
                                         nombre: equipo["nombre"],
-                                        descripcion:
-                                            equipo["descripcion"] ?? "",
+                                        descripcion: equipo["descripcion"],
                                         idDeporte: equipo["id_deporte"],
                                         idEspacio: equipo["id_espacio"],
                                         idCategoria: equipo["id_categoria"],
                                         capacidad: equipo["capacidad_maxima"],
+                                        idUsuario: widget.idUsuario, // 🔥 ESTE ES CLAVE
                                       ),
                                     );
                                   } else if (value == "eliminar") {

@@ -10,6 +10,7 @@ class ModificarEquipo extends StatefulWidget {
   final int idEspacio;
   final int idCategoria;
   final int capacidad;
+  final int idUsuario; // 🔥 AQUI
 
   const ModificarEquipo({
     super.key,
@@ -20,6 +21,7 @@ class ModificarEquipo extends StatefulWidget {
     required this.idEspacio,
     required this.idCategoria,
     required this.capacidad,
+    required this.idUsuario, // 🔥 AQUI
   });
 
   @override
@@ -73,7 +75,11 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
   /// 🔥 ESPACIOS (POR DEPORTE)
   Future<void> obtenerEspacios(int idDeporte) async {
-    var res = await http.get(Uri.parse("$baseUrl/espacios/deporte/$idDeporte"));
+    var res = await http.get(
+      Uri.parse(
+        "$baseUrl/espacios/deporte-entrenador/$idDeporte/${widget.idUsuario}",
+      ),
+    );
 
     var data = json.decode(res.body);
 
