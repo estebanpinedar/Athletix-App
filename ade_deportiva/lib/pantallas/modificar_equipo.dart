@@ -80,30 +80,30 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   /// 🔥 CARGAR HORARIO (CLAVE)
   /// =========================
   Future<void> cargarHorario() async {
-  try {
-    var res = await http.get(
-      Uri.parse("$baseUrl/equipos/${widget.idEquipo}/horario"),
-    );
+    try {
+      var res = await http.get(
+        Uri.parse("$baseUrl/equipos/${widget.idEquipo}/horario"),
+      );
 
-    var data = json.decode(res.body);
+      var data = json.decode(res.body);
 
-    if (data["success"]) {
-      setState(() {
-        diasSeleccionados = List<String>.from(data["dias"] ?? []);
+      if (data["success"]) {
+        setState(() {
+          diasSeleccionados = List<String>.from(data["dias"] ?? []);
 
-        if (data["hora"] != null) {
-          final parts = data["hora"].split(":");
-          horaSeleccionada = TimeOfDay(
-            hour: int.parse(parts[0]),
-            minute: int.parse(parts[1]),
-          );
-        }
-      });
+          if (data["hora"] != null) {
+            final parts = data["hora"].split(":");
+            horaSeleccionada = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      print("ERROR HORARIO: $e");
     }
-  } catch (e) {
-    print("ERROR HORARIO: $e");
   }
-}
 
   /// =========================
   /// 🔥 DEPORTES
@@ -168,7 +168,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           "id_categoria": categoriaSeleccionada,
           "capacidad_maxima": int.parse(capacidadController.text),
 
-          /// 🔥 HORARIO
+          /// 👇 AGREGAR ESTO
+          "id_usuario": widget.idUsuario,
+
+          /// HORARIO
           "dias": diasSeleccionados,
           "hora": horaSeleccionada != null
               ? "${horaSeleccionada!.hour.toString().padLeft(2, '0')}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}"
@@ -185,14 +188,14 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
 
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["error"] ?? "Error")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(data["error"] ?? "Error")));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -205,7 +208,6 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-
               /// 🔙 BACK
               Align(
                 alignment: Alignment.centerLeft,
@@ -335,9 +337,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   onPressed: () async {
                     final hora = await showTimePicker(
                       context: context,
@@ -395,9 +395,7 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
       decoration: InputDecoration(
         prefixIcon: Icon(icon),
         hintText: hint,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -418,15 +416,10 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
       value: items.any((e) => e[idKey] == value) ? value : null,
       decoration: InputDecoration(
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       items: items.map<DropdownMenuItem<int>>((item) {
-        return DropdownMenuItem(
-          value: item[idKey],
-          child: Text(item[textKey]),
-        );
+        return DropdownMenuItem(value: item[idKey], child: Text(item[textKey]));
       }).toList(),
       onChanged: onChanged,
     );

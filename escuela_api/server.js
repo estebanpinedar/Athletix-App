@@ -692,11 +692,13 @@ app.put("/equipos/:id", async (req, res) => {
     id_categoria,
     dias,
     hora,
-    id_usuario // 🔥 IMPORTANTE
+    id_usuario // 👈 IMPORTANTE
   } = req.body;
 
   try {
-    // 1. actualizar equipo
+    // =========================
+    // 1. ACTUALIZAR EQUIPO
+    // =========================
     await db.execute({
       sql: `
         UPDATE equipos
@@ -715,7 +717,9 @@ app.put("/equipos/:id", async (req, res) => {
       ],
     });
 
-    // 2. traer horarios actuales
+    // =========================
+    // 2. HORARIOS ACTUALES
+    // =========================
     const actual = await db.execute({
       sql: `SELECT dia FROM horarios_equipo WHERE id_equipo = ?`,
       args: [id],
@@ -724,7 +728,9 @@ app.put("/equipos/:id", async (req, res) => {
     const diasActuales = actual.rows.map(r => r.dia);
     const nuevosDias = dias || [];
 
-    // 3. eliminar días quitados
+    // =========================
+    // 3. ELIMINAR DIAS QUITADOS
+    // =========================
     for (let dia of diasActuales) {
       if (!nuevosDias.includes(dia)) {
         await db.execute({
@@ -737,7 +743,9 @@ app.put("/equipos/:id", async (req, res) => {
       }
     }
 
-    // 4. insertar nuevos días
+    // =========================
+    // 4. INSERTAR NUEVOS DIAS
+    // =========================
     for (let dia of nuevosDias) {
       if (!diasActuales.includes(dia)) {
         await db.execute({
@@ -750,31 +758,50 @@ app.put("/equipos/:id", async (req, res) => {
       }
     }
 
-    // 5. actualizar hora
-    await db.execute({
-      sql: `
-        UPDATE horarios_equipo
-        SET hora = ?
-        WHERE id_equipo = ?
-      `,
-      args: [hora, id],
-    });
-
-    // 🔔 NOTIFICACION (DENTRO DEL TRY)
-    if (id_usuario) {
+    // =========================
+    // 5. ACTUALIZAR HORA
+    // =========================
+    if (hora) {
       await db.execute({
         sql: `
-          INSERT INTO notificaciones (id_usuario, mensaje)
-          VALUES (?, ?)
+          UPDATE horarios_equipo
+          SET hora = ?
+          WHERE id_equipo = ?
         `,
-        args: [id_usuario, "Modificaste un equipo"],
+        args: [hora, id],
       });
     }
 
+    // =========================
+    // 🔔 6. CREAR NOTIFICACION
+    // =========================
+    if (id_usuario) {
+      await db.execute({
+        sql: `
+          INSERT INTO notificaciones 
+          (id_usuario, mensaje, tipo, fecha)
+          VALUES (?, ?, ?, datetime('now'))
+        `,
+        args: [
+          id_usuario,
+          `Modificaste el equipo ${nombre}`,
+          "equipo"
+        ],
+      });
+    }
+
+    // =========================
+    // ✅ RESPUESTA
+    // =========================
     res.json({ success: true });
 
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.log("ERROR MODIFICAR EQUIPO:", error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
