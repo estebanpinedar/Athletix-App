@@ -181,14 +181,14 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Registrar Entrenamiento",
+                                  "Inscripción Equipos",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  "¡Registra aquí!",
+                                  "¡Inscribete aquí!",
                                   style: TextStyle(color: Colors.white70),
                                 ),
                               ],
@@ -279,14 +279,14 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                                   ),
                                   const Spacer(),
                                   const Text(
-                                    "Mis Entrenamientos",
+                                    "Mis Equipos",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const Text(
-                                    "Ver tus entrenos activos",
+                                    "Ver tus equipos activos",
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,

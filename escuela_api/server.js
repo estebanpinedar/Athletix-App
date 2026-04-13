@@ -945,6 +945,56 @@ app.get("/equipos/filtrados", async (req, res) => {
   }
 });
 
+//ELIMINAR INSCRIPCION
+app.get("/mis-inscripciones/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT 
+          e.id_equipo,
+          e.nombre,
+          d.nombre as deporte,
+          c.nombre as categoria
+        FROM inscripcion i
+        JOIN equipos e ON i.id_equipo = e.id_equipo
+        JOIN deportes d ON e.id_deporte = d.id_deporte
+        JOIN categorias c ON e.id_categoria = c.id_categoria
+        WHERE i.id_usuario = ?
+      `,
+      args: [idUsuario],
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+app.delete("/inscripcion", async (req, res) => {
+  const { id_usuario, id_equipo } = req.body;
+
+  try {
+    await db.execute({
+      sql: `
+        DELETE FROM inscripcion
+        WHERE id_usuario = ? AND id_equipo = ?
+      `,
+      args: [id_usuario, id_equipo],
+    });
+
+    res.json({ success: true });
+
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
