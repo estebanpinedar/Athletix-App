@@ -54,7 +54,9 @@ class _GestionEspaciosState extends State<GestionEspacios> {
   ///ELIMINAR ESPACIO
   Future<void> eliminarEspacio(int idEspacio) async {
     try {
-      var url = Uri.parse("https://escuela-deportiva-project.onrender.com/espacios/$idEspacio");
+      var url = Uri.parse(
+        "https://escuela-deportiva-project.onrender.com/espacios/$idEspacio?id_usuario=${widget.idUsuario}",
+      );
 
       var response = await http.delete(url);
 
@@ -241,7 +243,9 @@ class _GestionEspaciosState extends State<GestionEspacios> {
                                       ),
                                     );
                                   } else if (value == "eliminar") {
-                                    mostrarDialogoEliminar(espacio["id_espacio"]); // 🔥 AQUÍ
+                                    mostrarDialogoEliminar(
+                                      espacio["id_espacio"],
+                                    ); // 🔥 AQUÍ
                                   }
                                 },
                                 itemBuilder: (context) => const [

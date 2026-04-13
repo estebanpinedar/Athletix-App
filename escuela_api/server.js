@@ -467,7 +467,7 @@ if (entrenador.rows.length > 0) {
 // ELIMINAR ESPACIO
 app.delete("/espacios/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.body; // ✅ NECESARIO
+  const id_usuario = req.query.id_usuario; // ✅ CLAVE
 
   try {
     await db.execute({
@@ -475,15 +475,17 @@ app.delete("/espacios/:id", async (req, res) => {
       args: [id],
     });
 
-    await crearNotificacion(
+    res.json({ success: true });
+
+    // 🔥 NOTIFICACIÓN
+    crearNotificacion(
       id_usuario,
       "Eliminaste un espacio",
       "espacio"
     );
 
-    res.json({ success: true });
-
   } catch (error) {
+    console.log("ERROR ELIMINAR ESPACIO:", error);
     res.json({
       success: false,
       error: error.message,
