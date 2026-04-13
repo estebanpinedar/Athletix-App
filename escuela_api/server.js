@@ -922,10 +922,14 @@ app.get("/equipos/filtrados", async (req, res) => {
   try {
     const result = await db.execute({
       sql: `
-        SELECT *
-        FROM equipos
-        WHERE id_deporte = ?
-        AND id_categoria = ?
+        SELECT e.*, 
+        COUNT(i.id_equipo) as inscritos
+        FROM equipos e
+        LEFT JOIN inscripciones i 
+        ON e.id_equipo = i.id_equipo
+        WHERE e.id_deporte = ?
+        AND e.id_categoria = ?
+        GROUP BY e.id_equipo
       `,
       args: [deporte, categoria],
     });

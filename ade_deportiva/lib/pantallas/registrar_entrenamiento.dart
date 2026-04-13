@@ -20,8 +20,7 @@ class RegistrarEntrenamiento extends StatefulWidget {
 }
 
 class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
-  final String api =
-      "https://escuela-deportiva-project.onrender.com";
+  final String api = "https://escuela-deportiva-project.onrender.com";
 
   int? idDeporte;
   int? idCategoria;
@@ -51,7 +50,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     var data = json.decode(res.body);
 
     setState(() {
-      deportes = data["deportes"];
+      deportes = data["deportes"] ?? [];
     });
   }
 
@@ -63,20 +62,18 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     var data = json.decode(res.body);
 
     setState(() {
-      categorias = data["categorias"];
+      categorias = data["categorias"] ?? [];
     });
   }
 
   // =========================
-  // EQUIPOS FILTRADOS
+  // EQUIPOS FILTRADOS (CORRECTO)
   // =========================
   Future<void> obtenerEquipos() async {
     if (idDeporte == null || idCategoria == null) return;
 
     var res = await http.get(
-      Uri.parse(
-        "$api/equipos/filtrados?deporte=$idDeporte&categoria=$idCategoria",
-      ),
+      Uri.parse("$api/equipos/disponibles/$idDeporte/$idCategoria"),
     );
 
     var data = json.decode(res.body);
@@ -107,23 +104,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
   }
 
   // =========================
-  // CAPACIDAD
-  // =========================
-  Future<void> verificarCapacidad(int id) async {
-    var res = await http.get(
-      Uri.parse("$api/equipos/$id"),
-    );
-
-    var data = json.decode(res.body);
-
-    setState(() {
-      grupoLleno =
-          data["inscritos"] >= data["capacidad_maxima"];
-    });
-  }
-
-  // =========================
-  // INSCRIPCIÓN
+  // INSCRIPCIÓN (CORRECTO BACKEND)
   // =========================
   Future<void> inscribirse() async {
     if (idEquipo == null) return;
@@ -136,7 +117,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     }
 
     var res = await http.post(
-      Uri.parse("$api/inscripciones"),
+      Uri.parse("$api/inscribir"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "id_usuario": widget.idUsuario,
@@ -146,16 +127,20 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
     var data = json.decode(res.body);
 
-    if (data["success"]) {
+    if (data["success"] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Inscripción exitosa")),
       );
       Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["msg"] ?? "Error")),
+      );
     }
   }
 
   // =========================
-  // UI DROPDOWN
+  // DROPDOWN
   // =========================
   Widget dropdown(
     String hint,
@@ -198,7 +183,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
           child: Column(
             children: [
 
-              /// 🔙 BACK
+              /// BACK
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
@@ -213,8 +198,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
               const Text(
                 "Inscripción a Equipos",
-                style: TextStyle(
-                    fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 25),
@@ -231,6 +215,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                     idDeporte = v;
                     idCategoria = null;
                     equipos = [];
+                    idEquipo = null;
                   });
                 },
               ),
@@ -247,9 +232,11 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                 (v) {
                   setState(() {
                     idCategoria = v;
+                    equipos = [];
+                    idEquipo = null;
                   });
 
-                  if (idDeporte != null && v != null) {
+                  if (idDeporte != null && idCategoria != null) {
                     obtenerEquipos();
                   }
                 },
@@ -269,8 +256,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                     idEquipo = v;
                   });
 
-                  await obtenerHorario(v!);
-                  await verificarCapacidad(v);
+                  if (v != null) {
+                    await obtenerHorario(v);
+                  }
                 },
               ),
 
@@ -310,14 +298,13 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
               const SizedBox(height: 20),
 
-              /// BOTON
+              /// BOTÓN
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: inscribirse,
                   child: const Text(
