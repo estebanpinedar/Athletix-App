@@ -80,30 +80,30 @@ class _ModificarEquipoState extends State<ModificarEquipo> {
   /// 🔥 CARGAR HORARIO (CLAVE)
   /// =========================
   Future<void> cargarHorario() async {
-    try {
-      var res = await http.get(
-        Uri.parse("$baseUrl/equipos/${widget.idEquipo}/horario"),
-      );
+  try {
+    var res = await http.get(
+      Uri.parse("$baseUrl/equipos/${widget.idEquipo}/horario"),
+    );
 
-      var data = json.decode(res.body);
+    var data = json.decode(res.body);
 
-      if (data["success"]) {
-        setState(() {
-          diasSeleccionados = List<String>.from(data["dias"] ?? []);
+    if (data["success"]) {
+      setState(() {
+        diasSeleccionados = List<String>.from(data["dias"] ?? []);
 
-          if (data["hora"] != null) {
-            final parts = data["hora"].split(":");
-            horaSeleccionada = TimeOfDay(
-              hour: int.parse(parts[0]),
-              minute: int.parse(parts[1]),
-            );
-          }
-        });
-      }
-    } catch (e) {
-      print("Error horario: $e");
+        if (data["hora"] != null) {
+          final parts = data["hora"].split(":");
+          horaSeleccionada = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        }
+      });
     }
+  } catch (e) {
+    print("ERROR HORARIO: $e");
   }
+}
 
   /// =========================
   /// 🔥 DEPORTES

@@ -674,15 +674,31 @@ app.put("/equipos/:id", async (req, res) => {
       ],
     });
 
-    // 2. borrar horarios anteriores
-    await db.execute({
-      sql: `DELETE FROM horarios_equipo WHERE id_equipo = ?`,
+    // 2. traer horarios actuales
+    const actual = await db.execute({
+      sql: `SELECT dia FROM horarios_equipo WHERE id_equipo = ?`,
       args: [id],
     });
 
-    // 3. insertar nuevos horarios
-    if (dias && dias.length > 0 && hora) {
-      for (let dia of dias) {
+    const diasActuales = actual.rows.map(r => r.dia);
+    const nuevosDias = dias || [];
+
+    // 3. eliminar los que ya no están
+    for (let dia of diasActuales) {
+      if (!nuevosDias.includes(dia)) {
+        await db.execute({
+          sql: `
+            DELETE FROM horarios_equipo
+            WHERE id_equipo = ? AND dia = ?
+          `,
+          args: [id, dia],
+        });
+      }
+    }
+
+    // 4. insertar nuevos días
+    for (let dia of nuevosDias) {
+      if (!diasActuales.includes(dia)) {
         await db.execute({
           sql: `
             INSERT INTO horarios_equipo (id_equipo, dia, hora)
@@ -693,13 +709,20 @@ app.put("/equipos/:id", async (req, res) => {
       }
     }
 
+    // 5. actualizar hora en todos los registros del equipo
+    await db.execute({
+      sql: `
+        UPDATE horarios_equipo
+        SET hora = ?
+        WHERE id_equipo = ?
+      `,
+      args: [hora, id],
+    });
+
     res.json({ success: true });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
