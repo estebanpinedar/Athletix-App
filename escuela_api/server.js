@@ -521,6 +521,159 @@ app.post("/entrenamientos", async (req, res) => {
   }
 });
 
+//OBTENER EQUIPOS POR ENTRENADOR
+app.get("/equipos/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    // 🔥 convertir usuario → entrenador
+    const entrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [idUsuario],
+    });
+
+    if (entrenador.rows.length === 0) {
+      return res.json({ success: false, error: "No es entrenador" });
+    }
+
+    const id_entrenador = entrenador.rows[0].id_entrenador;
+
+    // 🔥 traer equipos con info completa
+    const result = await db.execute({
+      sql: `
+        SELECT 
+          e.*,
+          d.nombre AS deporte,
+          c.nombre AS categoria,
+          es.nombre AS espacio
+        FROM equipos e
+        JOIN deportes d ON e.id_deporte = d.id_deporte
+        JOIN categorias c ON e.id_categoria = c.id_categoria
+        JOIN espacios es ON e.id_espacio = es.id_espacio
+        WHERE e.id_entrenador = ?
+      `,
+      args: [id_entrenador],
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+//REGISTRAR EQUIPOS
+app.post("/equipos", async (req, res) => {
+  const {
+    nombre,
+    descripcion,
+    capacidad_maxima,
+    id_deporte,
+    id_espacio,
+    id_categoria,
+    id_usuario
+  } = req.body;
+
+  try {
+    // 🔥 convertir usuario → entrenador
+    const entrenador = await db.execute({
+      sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
+      args: [id_usuario],
+    });
+
+    if (entrenador.rows.length === 0) {
+      return res.json({
+        success: false,
+        error: "El usuario no es entrenador",
+      });
+    }
+
+    const id_entrenador = entrenador.rows[0].id_entrenador;
+
+    // 🔥 insertar equipo
+    await db.execute({
+      sql: `
+        INSERT INTO equipos
+        (nombre, descripcion, capacidad_maxima, id_deporte, id_espacio, id_entrenador, id_categoria)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        nombre,
+        descripcion,
+        capacidad_maxima,
+        id_deporte,
+        id_espacio,
+        id_entrenador,
+        id_categoria
+      ],
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+//MODIFICAR EQUIPOS
+app.put("/equipos/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    descripcion,
+    capacidad_maxima,
+    id_deporte,
+    id_espacio,
+    id_categoria
+  } = req.body;
+
+  try {
+    await db.execute({
+      sql: `
+        UPDATE equipos
+        SET nombre = ?, descripcion = ?, capacidad_maxima = ?, 
+            id_deporte = ?, id_espacio = ?, id_categoria = ?
+        WHERE id_equipo = ?
+      `,
+      args: [
+        nombre,
+        descripcion,
+        capacidad_maxima,
+        id_deporte,
+        id_espacio,
+        id_categoria,
+        id
+      ],
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+//ELIMINAR EQUIPOS
+app.delete("/equipos/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.execute({
+      sql: "DELETE FROM equipos WHERE id_equipo = ?",
+      args: [id],
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================

@@ -186,6 +186,15 @@ class _DrawerMenuState extends State<DrawerMenu> {
                       ),
                     ),
                   ),
+
+                  // 🔥 NUEVO: EQUIPOS
+                  ListTile(
+                    leading: const Icon(Icons.groups),
+                    title: const Text("Equipos"),
+                    onTap: () => _navegar(
+                      EquiposEntrenador(idUsuario: widget.idUsuario),
+                    ),
+                  ),
                 ],
 
                 /// 🔥 COMUNES (AMBOS)
