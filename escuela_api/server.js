@@ -1069,6 +1069,47 @@ app.get("/calendario/entrenador/:id", async (req, res) => {
   }
 });
 
+//OBTENER NOTIFICACIONES
+app.get("/notificaciones/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT * FROM notificaciones
+        WHERE id_usuario = ?
+        ORDER BY id_notificacion DESC
+      `,
+      args: [idUsuario],
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
+//ELIMINAR NOTIFICACIÓN (SWIPE)
+app.delete("/notificaciones/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.execute({
+      sql: "DELETE FROM notificaciones WHERE id_notificacion = ?",
+      args: [id],
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
