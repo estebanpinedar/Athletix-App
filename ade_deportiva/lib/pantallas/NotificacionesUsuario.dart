@@ -16,47 +16,64 @@ class NotificacionesUsuario extends StatefulWidget {
   });
 
   @override
-  State<NotificacionesUsuario> createState() => _NotificacionesUsuarioState();
+  State<NotificacionesUsuario> createState() =>
+      _NotificacionesUsuarioState();
 }
 
 class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
-  final String api = "https://escuela-deportiva-project.onrender.com";
-
   int _currentIndex = 3;
+
+  final String api =
+      "https://escuela-deportiva-project.onrender.com";
+
   List notificaciones = [];
+  bool cargando = true;
 
   @override
   void initState() {
     super.initState();
-    cargarNotificaciones();
+    obtenerNotificaciones();
   }
 
   // =========================
-  // CARGAR NOTIFICACIONES
+  // 🔥 OBTENER NOTIFICACIONES
   // =========================
-  Future<void> cargarNotificaciones() async {
-    var res = await http.get(
-      Uri.parse("$api/notificaciones/${widget.idUsuario}"),
+  Future<void> obtenerNotificaciones() async {
+    try {
+      var res = await http.get(
+        Uri.parse("$api/notificaciones/${widget.idUsuario}"),
+      );
+
+      var data = json.decode(res.body);
+
+      setState(() {
+        notificaciones = data["data"] ?? [];
+        cargando = false;
+      });
+
+    } catch (e) {
+      print("ERROR NOTIFICACIONES: $e");
+      setState(() {
+        cargando = false;
+      });
+    }
+  }
+
+  // =========================
+  // ❌ ELIMINAR NOTIFICACION
+  // =========================
+  Future<void> eliminarNotificacion(int id) async {
+    await http.delete(
+      Uri.parse("$api/notificaciones/$id"),
     );
 
-    var data = json.decode(res.body);
-
     setState(() {
-      notificaciones = data["data"] ?? [];
+      notificaciones.removeWhere((n) => n["id"] == id);
     });
   }
 
   // =========================
-  // ELIMINAR NOTIFICACIÓN
-  // =========================
-  void eliminarNotificacion(int index) {
-    setState(() {
-      notificaciones.removeAt(index);
-    });
-  }
-
-  // =========================
-  // NAV
+  // 🔥 NAVBAR
   // =========================
   void _onItemTapped(int index) {
     if (index == 0) {
@@ -113,11 +130,48 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
     });
   }
 
+  // =========================
+  // 🎨 ICONO SEGÚN TIPO
+  // =========================
+  IconData obtenerIcono(String tipo) {
+    switch (tipo) {
+      case "inscripcion":
+        return Icons.check_circle;
+      case "baja":
+        return Icons.cancel;
+      case "recordatorio":
+        return Icons.access_time;
+      case "equipo":
+        return Icons.groups;
+      case "espacio":
+        return Icons.place;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  // =========================
+  // 🎨 COLOR SEGÚN TIPO
+  // =========================
+  Color obtenerColor(String tipo) {
+    switch (tipo) {
+      case "inscripcion":
+        return Colors.green;
+      case "baja":
+        return Colors.red;
+      case "recordatorio":
+        return Colors.orange;
+      default:
+        return Colors.blue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EEF2),
 
+      /// DRAWER
       drawer: DrawerMenu(
         idUsuario: widget.idUsuario,
         nombreCompleto: widget.nombreCompleto,
@@ -129,24 +183,39 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
           children: [
             /// HEADER
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu, size: 30),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
                     ),
                   ),
                   const Text(
                     "Notificaciones",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Icon(Icons.notifications, size: 28),
+                  IconButton(
+                    icon: const Icon(Icons.account_circle, size: 32),
+                    onPressed: () {
+                      navegarRapido(
+                        context,
+                        PerfilUsuario(
+                          idUsuario: widget.idUsuario,
+                          nombreCompleto: widget.nombreCompleto,
+                          rol: widget.rol,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -155,84 +224,83 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
 
             /// LISTA
             Expanded(
-              child: notificaciones.isEmpty
-                  ? const Center(
-                      child: Text("No tienes notificaciones"),
-                    )
-                  : ListView.builder(
-                      itemCount: notificaciones.length,
-                      itemBuilder: (context, index) {
-                        final n = notificaciones[index];
+              child: cargando
+                  ? const Center(child: CircularProgressIndicator())
+                  : notificaciones.isEmpty
+                      ? const Center(
+                          child: Text("No hay notificaciones"),
+                        )
+                      : ListView.builder(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: notificaciones.length,
+                          itemBuilder: (context, index) {
+                            final n = notificaciones[index];
 
-                        return Dismissible(
-                          key: Key(n["id_notificacion"].toString()),
-                          direction: DismissDirection.horizontal,
+                            return Dismissible(
+                              key: Key(n["id"].toString()),
+                              direction: DismissDirection.horizontal,
+                              onDismissed: (direction) {
+                                eliminarNotificacion(n["id"]);
+                              },
 
-                          onDismissed: (direction) {
-                            eliminarNotificacion(index);
-                          },
-
-                          background: Container(
-                            color: Colors.red,
-                            alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.only(left: 20),
-                            child: const Icon(Icons.delete, color: Colors.white),
-                          ),
-
-                          secondaryBackground: Container(
-                            color: Colors.red,
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(Icons.delete, color: Colors.white),
-                          ),
-
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 5,
-                                )
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.notifications,
-                                    color: Colors.blue),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        n["titulo"] ?? "",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(n["mensaje"] ?? ""),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        n["fecha"] ?? "",
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withOpacity(0.05),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      obtenerIcono(n["tipo"] ?? ""),
+                                      color:
+                                          obtenerColor(n["tipo"] ?? ""),
+                                      size: 35,
+                                    ),
+                                    const SizedBox(width: 15),
+
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            n["mensaje"] ?? "",
+                                            style: const TextStyle(
+                                              fontWeight:
+                                                  FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            n["fecha"] ?? "",
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),
@@ -247,10 +315,14 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle, size: 40), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
+              icon: Icon(Icons.calendar_month), label: ""),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle, size: 40),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.notifications), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
         ],
       ),
