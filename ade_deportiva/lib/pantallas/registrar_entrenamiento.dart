@@ -31,9 +31,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
   List categorias = [];
   List equipos = [];
 
-  Map<String, dynamic>? equipoSeleccionado;
-  List<String> dias = [];
+  List dias = [];
   String? hora;
+
   bool grupoLleno = false;
 
   @override
@@ -43,9 +43,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     obtenerCategorias();
   }
 
-  /// =========================
-  /// DEPORTES
-  /// =========================
+  // =========================
+  // DEPORTES
+  // =========================
   Future<void> obtenerDeportes() async {
     var res = await http.get(Uri.parse("$api/deportes"));
     var data = json.decode(res.body);
@@ -55,9 +55,9 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     });
   }
 
-  /// =========================
-  /// CATEGORIAS
-  /// =========================
+  // =========================
+  // CATEGORIAS
+  // =========================
   Future<void> obtenerCategorias() async {
     var res = await http.get(Uri.parse("$api/categorias"));
     var data = json.decode(res.body);
@@ -67,30 +67,32 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     });
   }
 
-  /// =========================
-  /// EQUIPOS FILTRADOS
-  /// =========================
+  // =========================
+  // EQUIPOS FILTRADOS
+  // =========================
   Future<void> obtenerEquipos() async {
     if (idDeporte == null || idCategoria == null) return;
 
-    var res = await http.get(Uri.parse(
-        "$api/equipos/filtrados?deporte=$idDeporte&categoria=$idCategoria"));
+    var res = await http.get(
+      Uri.parse(
+        "$api/equipos/filtrados?deporte=$idDeporte&categoria=$idCategoria",
+      ),
+    );
 
     var data = json.decode(res.body);
 
     setState(() {
       equipos = data["data"] ?? [];
       idEquipo = null;
-      equipoSeleccionado = null;
       dias = [];
       hora = null;
       grupoLleno = false;
     });
   }
 
-  /// =========================
-  /// HORARIO EQUIPO
-  /// =========================
+  // =========================
+  // HORARIO EQUIPO
+  // =========================
   Future<void> obtenerHorario(int id) async {
     var res = await http.get(
       Uri.parse("$api/equipos/$id/horario"),
@@ -104,22 +106,28 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
     });
   }
 
-  /// =========================
-  /// VERIFICAR CAPACIDAD
-  /// =========================
-  Future<void> verificarEquipo(int id) async {
-    var res = await http.get(Uri.parse("$api/equipos/$id"));
+  // =========================
+  // CAPACIDAD
+  // =========================
+  Future<void> verificarCapacidad(int id) async {
+    var res = await http.get(
+      Uri.parse("$api/equipos/$id"),
+    );
+
     var data = json.decode(res.body);
 
     setState(() {
-      grupoLleno = data["inscritos"] >= data["capacidad_maxima"];
+      grupoLleno =
+          data["inscritos"] >= data["capacidad_maxima"];
     });
   }
 
-  /// =========================
-  /// INSCRIBIR
-  /// =========================
+  // =========================
+  // INSCRIPCIÓN
+  // =========================
   Future<void> inscribirse() async {
+    if (idEquipo == null) return;
+
     if (grupoLleno) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("❌ El grupo está lleno")),
@@ -140,16 +148,16 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
     if (data["success"]) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Inscripción realizada")),
+        const SnackBar(content: Text("Inscripción exitosa")),
       );
       Navigator.pop(context);
     }
   }
 
-  /// =========================
-  /// UI INPUT
-  /// =========================
-  Widget _dropdown(
+  // =========================
+  // UI DROPDOWN
+  // =========================
+  Widget dropdown(
     String hint,
     int? value,
     List items,
@@ -204,14 +212,15 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               const SizedBox(height: 10),
 
               const Text(
-                "Inscribirse a Equipo",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                "Inscripción a Equipos",
+                style: TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 25),
 
               /// DEPORTE
-              _dropdown(
+              dropdown(
                 "Deporte",
                 idDeporte,
                 deportes,
@@ -229,7 +238,7 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
               const SizedBox(height: 15),
 
               /// CATEGORIA
-              _dropdown(
+              dropdown(
                 "Categoría",
                 idCategoria,
                 categorias,
@@ -239,14 +248,17 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                   setState(() {
                     idCategoria = v;
                   });
-                  obtenerEquipos();
+
+                  if (idDeporte != null && v != null) {
+                    obtenerEquipos();
+                  }
                 },
               ),
 
               const SizedBox(height: 15),
 
               /// EQUIPOS
-              _dropdown(
+              dropdown(
                 "Equipo",
                 idEquipo,
                 equipos,
@@ -255,12 +267,10 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                 (v) async {
                   setState(() {
                     idEquipo = v;
-                    equipoSeleccionado = equipos
-                        .firstWhere((e) => e["id_equipo"] == v);
                   });
 
                   await obtenerHorario(v!);
-                  await verificarEquipo(v);
+                  await verificarCapacidad(v);
                 },
               ),
 
@@ -279,8 +289,10 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Horario:",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Horario del equipo",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text("Días: ${dias.join(", ")}"),
                       Text("Hora: $hora"),
                     ],
@@ -289,26 +301,29 @@ class _RegistrarEntrenamientoState extends State<RegistrarEntrenamiento> {
 
               const SizedBox(height: 20),
 
-              /// ESTADO GRUPO
+              /// FULL
               if (grupoLleno)
                 const Text(
-                  "⚠️ El grupo está lleno",
+                  "⚠️ Grupo lleno",
                   style: TextStyle(color: Colors.red),
                 ),
 
               const SizedBox(height: 20),
 
-              /// BOTÓN
+              /// BOTON
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: inscribirse,
-                  child: const Text("Confirmar",
-                      style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "Confirmar inscripción",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
 

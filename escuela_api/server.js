@@ -916,6 +916,30 @@ app.get("/equipos/disponibles/:deporte/:categoria", async (req, res) => {
   }
 });
 
+app.get("/equipos/filtrados", async (req, res) => {
+  const { deporte, categoria } = req.query;
+
+  try {
+    const result = await db.execute({
+      sql: `
+        SELECT *
+        FROM equipos
+        WHERE id_deporte = ?
+        AND id_categoria = ?
+      `,
+      args: [deporte, categoria],
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // =========================
 // 🚀 SERVIDOR
 // =========================
