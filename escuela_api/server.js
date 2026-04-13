@@ -674,23 +674,28 @@ app.delete("/equipos/:id", async (req, res) => {
   }
 });
 
+//ESPACIOS POR DEPORTE + ENTRENADOR
+
 app.get("/espacios/deporte/:idDeporte/:idUsuario", async (req, res) => {
   const { idDeporte, idUsuario } = req.params;
 
   try {
-    // 🔥 convertir usuario → entrenador
+    // 🔥 Convertir usuario → entrenador
     const entrenador = await db.execute({
       sql: "SELECT id_entrenador FROM entrenadores WHERE id_usuario = ?",
       args: [idUsuario],
     });
 
     if (entrenador.rows.length === 0) {
-      return res.json({ success: false });
+      return res.json({
+        success: false,
+        error: "Usuario no es entrenador",
+      });
     }
 
     const id_entrenador = entrenador.rows[0].id_entrenador;
 
-    // 🔥 traer espacios del entrenador + deporte
+    // 🔥 Filtrar espacios por deporte + entrenador
     const espacios = await db.execute({
       sql: `
         SELECT id_espacio, nombre
@@ -706,8 +711,33 @@ app.get("/espacios/deporte/:idDeporte/:idUsuario", async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, error: error.message });
+    console.log("ERROR ESPACIOS:", error);
+    res.json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+//OBTENER TODAS LAS CATEGORÍAS
+app.get("/categorias", async (req, res) => {
+  try {
+    const result = await db.execute({
+      sql: "SELECT * FROM categorias",
+      args: [],
+    });
+
+    res.json({
+      success: true,
+      categorias: result.rows,
+    });
+
+  } catch (error) {
+    console.log("ERROR CATEGORIAS:", error);
+    res.json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
