@@ -779,7 +779,7 @@ app.put("/equipos/:id", async (req, res) => {
 //ELIMINAR EQUIPOS
 app.delete("/equipos/:id", async (req, res) => {
   const { id } = req.params;
-  const { id_usuario } = req.body; // ✅ AQUÍ
+  const id_usuario = req.query.id_usuario; // ✅ CAMBIO CLAVE
 
   try {
     await db.execute({
@@ -792,16 +792,17 @@ app.delete("/equipos/:id", async (req, res) => {
       args: [id],
     });
 
-    // 🔥 NOTIFICACIÓN DENTRO DEL TRY
-    await crearNotificacion(
+    res.json({ success: true });
+
+    // 🔥 NOTIFICACIÓN
+    crearNotificacion(
       id_usuario,
       "Eliminaste un equipo",
       "equipo"
     );
 
-    res.json({ success: true });
-
   } catch (error) {
+    console.log("ERROR ELIMINAR EQUIPO:", error);
     res.status(500).json({
       success: false,
       error: error.message,

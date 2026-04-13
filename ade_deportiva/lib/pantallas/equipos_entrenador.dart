@@ -48,7 +48,7 @@ class _EquiposEntrenadorState extends State<EquiposEntrenador> {
   Future<void> eliminarEquipo(int idEquipo) async {
     try {
       var url = Uri.parse(
-        "https://escuela-deportiva-project.onrender.com/equipos/$idEquipo",
+        "https://escuela-deportiva-project.onrender.com/equipos/$idEquipo?id_usuario=${widget.idUsuario}",
       );
 
       var response = await http.delete(url);
