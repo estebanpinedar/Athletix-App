@@ -767,13 +767,10 @@ app.put("/equipos/:id", async (req, res) => {
     // =========================
     try {
       if (id_usuario) {
-        await db.execute({
-          sql: `
-      INSERT INTO notificaciones (id_usuario, mensaje, fecha, leida)
-      VALUES (?, ?, datetime('now'), 0)
-    `,
-          args: [id_usuario, "Modificaste un equipo"],
-        });
+        await crearNotificacion(
+          id_usuario,
+          "Modificaste un equipo"
+        );
       }
     } catch (e) {
       console.log("ERROR NOTIFICACION:", e);
