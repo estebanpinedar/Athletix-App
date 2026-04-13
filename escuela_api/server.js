@@ -383,6 +383,10 @@ app.post("/espacios", async (req, res) => {
     console.log(error);
     res.json({ success: false, error: error.message });
   }
+  await crearNotificacion(
+  id_usuario,
+  "Registraste un nuevo espacio deportivo"
+);
 });
 
 // 🔥 OBTENER ESPACIOS POR ENTRENADOR
@@ -446,6 +450,18 @@ app.put("/espacios/:id", async (req, res) => {
       error: error.message,
     });
   }
+  // buscar entrenador
+const entrenador = await db.execute({
+  sql: "SELECT id_usuario FROM entrenadores WHERE id_entrenador = (SELECT id_entrenador FROM espacios WHERE id_espacio = ?)",
+  args: [id],
+});
+
+if (entrenador.rows.length > 0) {
+  await crearNotificacion(
+    entrenador.rows[0].id_usuario,
+    "Modificaste un espacio"
+  );
+}
 });
 
 // ELIMINAR ESPACIO
@@ -465,6 +481,10 @@ app.delete("/espacios/:id", async (req, res) => {
       error: error.message,
     });
   }
+  await crearNotificacion(
+  idUsuario, // si lo tienes en frontend
+  "Eliminaste un espacio"
+);
 });
 
 //ESPACIOS POR DEPORTE (CON ENTRENADOR)
@@ -647,6 +667,10 @@ app.post("/equipos", async (req, res) => {
       error: error.message,
     });
   }
+  await crearNotificacion(
+  id_usuario,
+  "Creaste un nuevo equipo"
+);
 });
 
 //MODIFICAR EQUIPOS
@@ -734,6 +758,10 @@ app.put("/equipos/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+  await crearNotificacion(
+  id_usuario,
+  "Modificaste un equipo"
+);
 });
 
 //ELIMINAR EQUIPOS
@@ -761,6 +789,10 @@ app.delete("/equipos/:id", async (req, res) => {
       error: error.message,
     });
   }
+  await crearNotificacion(
+  id_usuario,
+  "Eliminaste un equipo"
+);
 });
 
 //ESPACIOS POR DEPORTE + ENTRENADOR
@@ -999,12 +1031,18 @@ app.delete("/inscripcion", async (req, res) => {
 
   try {
     await db.execute({
-      sql: `
-        DELETE FROM inscripcion
-        WHERE id_usuario = ? AND id_equipo = ?
-      `,
-      args: [id_usuario, id_equipo],
-    });
+  sql: `
+    DELETE FROM inscripcion
+    WHERE id_usuario = ? AND id_equipo = ?
+  `,
+  args: [id_usuario, id_equipo],
+});
+
+// 🔔 NOTIFICACIÓN
+await crearNotificacion(
+  id_usuario,
+  "Te diste de baja de un equipo"
+);
 
     res.json({ success: true });
 
