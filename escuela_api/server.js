@@ -769,10 +769,10 @@ app.put("/equipos/:id", async (req, res) => {
       if (id_usuario) {
         await db.execute({
           sql: `
-            INSERT INTO notificaciones (id_usuario, mensaje, tipo)
-            VALUES (?, ?, ?)
-          `,
-          args: [id_usuario, "Modificaste un equipo", "equipo"],
+      INSERT INTO notificaciones (id_usuario, mensaje, fecha, leida)
+      VALUES (?, ?, datetime('now'), 0)
+    `,
+          args: [id_usuario, "Modificaste un equipo"],
         });
       }
     } catch (e) {
