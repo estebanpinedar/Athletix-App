@@ -3,8 +3,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screens.dart';
 
-class IniciarSesion extends StatelessWidget {
-  IniciarSesion({super.key});
+class IniciarSesion extends StatefulWidget {
+  const IniciarSesion({super.key});
+
+  @override
+  State<IniciarSesion> createState() => _IniciarSesionState();
+}
+
+class _IniciarSesionState extends State<IniciarSesion> {
+  bool obscurePassword = true;
 
   // CONTROLADORES
   final TextEditingController emailController = TextEditingController();
@@ -59,79 +66,140 @@ class IniciarSesion extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text(
-          "Ingresa tu correo electrónico para restablecer la contraseña",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        content: SizedBox(
-          width: 400,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1B2340),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              /// ICONO
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2F80ED), Color(0xFF1E5DBF)],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.lock_reset,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// TITULO
+              const Text(
+                "Recuperar contraseña",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                "Ingresa tu correo electrónico para restablecer tu contraseña",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF9FA8C3), fontSize: 13),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// INPUT EMAIL
               TextField(
                 controller: emailController,
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.email),
+                  prefixIcon: const Icon(Icons.email, color: Color(0xFF7C86A2)),
                   hintText: "Correo electrónico",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  hintStyle: const TextStyle(color: Color(0xFF7C86A2)),
+                  filled: true,
+                  fillColor: const Color(0xFF232C4A),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFF2E3A5F)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF2F80ED),
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
 
+              const SizedBox(height: 25),
+
+              /// BOTÓN ENVIAR
               SizedBox(
-                width: 220,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                width: double.infinity,
+                height: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2F80ED), Color(0xFF1E5DBF)],
                     ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  onPressed: () {
-                    if (emailController.text.isNotEmpty) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Correo enviado para restablecer contraseña",
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                    ),
+                    onPressed: () {
+                      if (emailController.text.isNotEmpty) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Correo enviado para restablecer contraseña",
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text(
-                    "Restablecer contraseña",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      "Enviar enlace",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 12),
 
-              SizedBox(
-                width: 150,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    side: BorderSide(color: Colors.grey.shade400),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Cancelar",
-                    style: TextStyle(color: Colors.black, fontSize: 14),
-                  ),
+              /// BOTÓN CANCELAR
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(color: Color(0xFF7C86A2)),
                 ),
               ),
             ],
@@ -144,151 +212,358 @@ class IniciarSesion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
-      appBar: AppBar(
-        title: const Text("Iniciar Sesión"),
-        backgroundColor: const Color(0xFFE8EEF2),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      backgroundColor: const Color(0xFF12192D),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 10),
-
-                /// LOGO
-                Center(
-                  child: Image.asset("assets/images/logo.png", height: 160),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text(
-                  "Sistema Gestor de Escuelas Deportivas",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
-                ),
-
-                const SizedBox(height: 40),
-
-                /// CORREO
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.email),
-                    hintText: "Correo electrónico",
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Colors.blue,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                /// CONTRASEÑA
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.lock),
-                    hintText: "Contraseña",
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Colors.blue,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                /// BOTON LOGIN
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      login(context);
+        child: Column(
+          children: [
+            /// 🔙 BOTÓN REGRESAR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
                     },
-                    child: const Text(
-                      "Iniciar Sesión",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                /// RECUPERAR CONTRASEÑA
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      _mostrarDialogoRecuperarContrasena(context);
-                    },
-                    child: const Text(
-                      "Recuperar contraseña",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1B2340),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Color(0xFF9FA8C3),
+                        size: 18,
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
 
-                const SizedBox(height: 5),
+            /// CONTENIDO
+            Expanded(
+              child: Stack(
+                children: [
+                  /// CONTENIDO CENTRADO
+                  Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          /// TARJETA COMPLETA
+                          Container(
+                            width: double.infinity,
+                            constraints: const BoxConstraints(maxWidth: 420),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 30,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1B2340),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 40,
+                                  offset: const Offset(0, 20),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                /// ICONO
+                                Center(
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF2F80ED),
+                                          Color(0xFF1E5DBF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Icon(
+                                      Icons.login,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
 
-                /// CREAR CUENTA
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("¿No tienes cuenta? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RegistroUsuario(),
+                                const SizedBox(height: 25),
+
+                                /// TITULO
+                                const Text(
+                                  "Bienvenido",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                const Text(
+                                  "Sistema Gestor de Escuelas Deportivas",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color(0xFF9FA8C3),
+                                    fontSize: 14,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 30),
+
+                                /// EMAIL
+                                const Text(
+                                  "CORREO ELECTRÓNICO",
+                                  style: TextStyle(
+                                    color: Color(0xFF7C86A2),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                TextField(
+                                  controller: emailController,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(
+                                      Icons.email,
+                                      color: Color(0xFF7C86A2),
+                                    ),
+                                    hintText: "tu@email.com",
+                                    hintStyle: const TextStyle(
+                                      color: Color(0xFF7C86A2),
+                                    ),
+                                    filled: true,
+                                    fillColor: const Color(0xFF232C4A),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2E3A5F),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2F80ED),
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 18),
+
+                                /// PASSWORD
+                                const Text(
+                                  "CONTRASEÑA",
+                                  style: TextStyle(
+                                    color: Color(0xFF7C86A2),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                TextField(
+                                  controller: passwordController,
+                                  obscureText: obscurePassword,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(
+                                      Icons.lock,
+                                      color: Color(0xFF7C86A2),
+                                    ),
+
+                                    /// 👁️ BOTÓN FUNCIONAL
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: const Color(0xFF7C86A2),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          obscurePassword = !obscurePassword;
+                                        });
+                                      },
+                                    ),
+
+                                    hintText: "••••••••",
+                                    hintStyle: const TextStyle(
+                                      color: Color(0xFF7C86A2),
+                                    ),
+                                    filled: true,
+                                    fillColor: const Color(0xFF232C4A),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2E3A5F),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2F80ED),
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 25),
+
+                                /// BOTON LOGIN
+                                SizedBox(
+                                  height: 55,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF2F80ED),
+                                          Color(0xFF1E5DBF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        login(context);
+                                      },
+                                      child: const Text(
+                                        "Iniciar Sesión",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// RECUPERAR
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      _mostrarDialogoRecuperarContrasena(
+                                        context,
+                                      );
+                                    },
+                                    child: const Text(
+                                      "Recuperar contraseña",
+                                      style: TextStyle(
+                                        color: Color(0xFF2F80ED),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                /// DIVISOR
+                                Row(
+                                  children: const [
+                                    Expanded(
+                                      child: Divider(color: Color(0xFF2E3A5F)),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                      child: Text(
+                                        "O",
+                                        style: TextStyle(
+                                          color: Color(0xFF7C86A2),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Divider(color: Color(0xFF2E3A5F)),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                /// REGISTRO
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      "¿No tienes cuenta? ",
+                                      style: TextStyle(
+                                        color: Color(0xFF9FA8C3),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        navegarRapido(context, const RegistroUsuario());
+                                      },
+                                      child: const Text(
+                                        "Crear una",
+                                        style: TextStyle(
+                                          color: Color(0xFF2F80ED),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        );
-                      },
-                      child: const Text(
-                        "Crea una",
+
+                          const SizedBox(height: 80),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  /// TEXTO FIJO ABAJO
+                  Positioned(
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: const Center(
+                      child: Text(
+                        "Plataforma segura de gestión deportiva",
                         style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF7C86A2),
+                          fontSize: 12,
                         ),
                       ),
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

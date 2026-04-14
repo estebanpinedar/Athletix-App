@@ -13,6 +13,12 @@ class RegistroUsuario extends StatefulWidget {
 class _RegistroUsuarioState extends State<RegistroUsuario> {
   String? rolSeleccionado;
 
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
+
+  String? errorPassword;
+  String? errorConfirmPassword;
+
   // CONTROLADORES
   final nombreController = TextEditingController();
   final documentoController = TextEditingController();
@@ -23,27 +29,38 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   /// 🔥 REGISTRO
   Future<void> registrar() async {
     if (passwordController.text != confirmPasswordController.text) {
+      setState(() {
+        errorConfirmPassword = "Las contraseñas no coinciden";
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Las contraseñas no coinciden")),
       );
       return;
     }
 
-    if (rolSeleccionado == null) {
+    if (errorPassword != null || errorConfirmPassword != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Selecciona un rol")),
+        const SnackBar(content: Text("Corrige los errores antes de continuar")),
       );
       return;
     }
 
-    var url = Uri.parse("https://escuela-deportiva-project.onrender.com/usuarios");
+    if (rolSeleccionado == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Selecciona un rol")));
+      return;
+    }
+
+    var url = Uri.parse(
+      "https://escuela-deportiva-project.onrender.com/usuarios",
+    );
 
     try {
       var response = await http.post(
         url,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "nombre": nombreController.text.trim(),
           "documento": documentoController.text.trim(),
@@ -70,10 +87,109 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error de conexión: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
     }
+  }
+
+  Widget _input(
+    TextEditingController controller,
+    IconData icon,
+    String hint, {
+    bool isPassword = false,
+    bool isConfirm = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword
+          ? (isConfirm ? obscureConfirmPassword : obscurePassword)
+          : false,
+      style: const TextStyle(color: Colors.white),
+      onChanged: (value) {
+        setState(() {
+          if (isPassword && !isConfirm) {
+            errorPassword = value.length < 6 ? "Mínimo 6 caracteres" : null;
+          }
+
+          if (isConfirm) {
+            errorConfirmPassword = value != passwordController.text
+                ? "Las contraseñas no coinciden"
+                : null;
+          }
+        });
+      },
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: const Color(0xFF7C86A2)),
+
+        /// 👁️ ICONO FUNCIONAL
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isConfirm
+                      ? (obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility)
+                      : (obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
+                  color: const Color(0xFF7C86A2),
+                ),
+                onPressed: () {
+                  setState(() {
+                    if (isConfirm) {
+                      obscureConfirmPassword = !obscureConfirmPassword;
+                    } else {
+                      obscurePassword = !obscurePassword;
+                    }
+                  });
+                },
+              )
+            : null,
+
+        hintText: hint,
+        hintStyle: const TextStyle(color: Color(0xFF7C86A2)),
+        filled: true,
+        fillColor: const Color(0xFF232C4A),
+
+        /// 🔴 BORDE DINÁMICO
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color:
+                (isConfirm && errorConfirmPassword != null) ||
+                    (!isConfirm && errorPassword != null && isPassword)
+                ? Colors.red
+                : const Color(0xFF2E3A5F),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color:
+                (isConfirm && errorConfirmPassword != null) ||
+                    (!isConfirm && errorPassword != null && isPassword)
+                ? Colors.red
+                : const Color(0xFF2F80ED),
+            width: 2,
+          ),
+        ),
+
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+
+        /// ❗ ERROR
+        errorText: isConfirm
+            ? errorConfirmPassword
+            : (isPassword ? errorPassword : null),
+      ),
+    );
   }
 
   @override
@@ -89,182 +205,304 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
-      appBar: AppBar(
-        title: const Text("Registro de usuario"),
-        backgroundColor: const Color(0xFFE8EEF2),
-      ),
+      resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xFF12192D),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 10),
-
-                Center(
-                  child: Image.asset("assets/images/logo.png", height: 160),
-                ),
-
-                const SizedBox(height: 30),
-
-                const Text(
-                  "Registro de usuario",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 30),
-
-                // NOMBRE
-                TextField(
-                  controller: nombreController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.person),
-                    hintText: "Nombre completo",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // DOCUMENTO
-                TextField(
-                  controller: documentoController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.badge),
-                    hintText: "Número de identificación",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // EMAIL
-                TextField(
-                  controller: correoController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.email),
-                    hintText: "Correo electrónico",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // PASSWORD
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.lock),
-                    hintText: "Contraseña",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // CONFIRM PASSWORD
-                TextField(
-                  controller: confirmPasswordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.lock),
-                    hintText: "Confirmar contraseña",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // ROL
-                DropdownButtonFormField<String>(
-                  value: rolSeleccionado,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.group),
-                    hintText: "Selecciona tu rol",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: "alumno",
-                      child: Text("Alumno"),
-                    ),
-                    DropdownMenuItem(
-                      value: "entrenador",
-                      child: Text("Entrenador"),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      rolSeleccionado = value;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 25),
-
-                // BOTÓN
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+        child: Column(
+          children: [
+            /// 🔙 BOTÓN ATRÁS
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1B2340),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Color(0xFF9FA8C3),
+                        size: 18,
                       ),
                     ),
-                    onPressed: registrar,
-                    child: const Text(
-                      "Registrar",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+
+            /// CONTENIDO
+            Expanded(
+              child: Stack(
+                children: [
+                  /// CENTRO
+                  Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          /// CARD
+                          Container(
+                            width: double.infinity,
+                            constraints: const BoxConstraints(maxWidth: 420),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 30,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1B2340),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 40,
+                                  offset: const Offset(0, 20),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                /// ICONO
+                                Center(
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF2F80ED),
+                                          Color(0xFF1E5DBF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_add,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 25),
+
+                                const Text(
+                                  "Crear cuenta",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                const Text(
+                                  "Regístrate en el sistema deportivo",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Color(0xFF9FA8C3)),
+                                ),
+
+                                const SizedBox(height: 30),
+
+                                /// NOMBRE
+                                _input(
+                                  nombreController,
+                                  Icons.person,
+                                  "Nombre completo",
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// DOCUMENTO
+                                _input(
+                                  documentoController,
+                                  Icons.badge,
+                                  "Número de identificación",
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// EMAIL
+                                _input(
+                                  correoController,
+                                  Icons.email,
+                                  "Correo electrónico",
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// PASSWORD
+                                _input(
+                                  passwordController,
+                                  Icons.lock,
+                                  "Contraseña",
+                                  isPassword: true,
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// CONFIRM PASSWORD
+                                _input(
+                                  confirmPasswordController,
+                                  Icons.lock,
+                                  "Confirmar contraseña",
+                                  isPassword: true,
+                                ),
+
+                                const SizedBox(height: 15),
+
+                                /// ROL
+                                DropdownButtonFormField<String>(
+                                  value: rolSeleccionado,
+                                  dropdownColor: const Color(0xFF232C4A),
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(
+                                      Icons.group,
+                                      color: Color(0xFF7C86A2),
+                                    ),
+
+                                    hint: Transform.translate(
+                                      offset: const Offset(0, -8),
+                                      child: const Text(
+                                        "Selecciona tu rol",
+                                        style: TextStyle(
+                                          color: Color(0xFF7C86A2),
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+
+                                    filled: true,
+                                    fillColor: const Color(0xFF232C4A),
+
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2E3A5F),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2F80ED),
+                                      ),
+                                    ),
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: "alumno",
+                                      child: Text("Alumno"),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: "entrenador",
+                                      child: Text("Entrenador"),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      rolSeleccionado = value;
+                                    });
+                                  },
+                                ),
+
+                                const SizedBox(height: 25),
+
+                                /// BOTÓN REGISTRAR
+                                SizedBox(
+                                  height: 55,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF2F80ED),
+                                          Color(0xFF1E5DBF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                      ),
+                                      onPressed: registrar,
+                                      child: const Text(
+                                        "Registrar",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                /// LOGIN
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      "¿Ya tienes cuenta? ",
+                                      style: TextStyle(
+                                        color: Color(0xFF9FA8C3),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        navegarRapido(
+                                          context,
+                                          const IniciarSesion(),
+                                        );
+                                      },
+                                      child: const Text(
+                                        "Inicia sesión",
+                                        style: TextStyle(
+                                          color: Color(0xFF2F80ED),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 80),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
-
-                // LOGIN
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("¿Ya tienes cuenta? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => IniciarSesion(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "Inicia sesión",
+                  /// FOOTER
+                  const Positioned(
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Text(
+                        "Plataforma segura de gestión deportiva",
                         style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF7C86A2),
+                          fontSize: 12,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
