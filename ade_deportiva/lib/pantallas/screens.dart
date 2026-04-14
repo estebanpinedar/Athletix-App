@@ -20,3 +20,4 @@ export 'modificar_espacio.dart';
 export 'equipos_entrenador.dart';
 export 'registro_equipo.dart';
 export 'modificar_equipo.dart';
+export 'base_scaffold.dart';

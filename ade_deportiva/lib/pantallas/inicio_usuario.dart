@@ -4,13 +4,13 @@ import 'screens.dart';
 class InicioUsuario extends StatefulWidget {
   final String nombreCompleto;
   final int idUsuario;
-  final String rol; // 🔥 NUEVO
+  final String rol;
 
   const InicioUsuario({
     super.key,
     required this.nombreCompleto,
     required this.idUsuario,
-    required this.rol, // 🔥
+    required this.rol,
   });
 
   @override
@@ -34,9 +34,8 @@ class _InicioUsuarioState extends State<InicioUsuario> {
     String nombreCorto = obtenerNombreCorto(widget.nombreCompleto);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
+      backgroundColor: const Color(0xFF12192D),
 
-      /// 🔥 DRAWER CORREGIDO
       drawer: DrawerMenu(
         idUsuario: widget.idUsuario,
         nombreCompleto: widget.nombreCompleto,
@@ -44,25 +43,35 @@ class _InicioUsuarioState extends State<InicioUsuario> {
       ),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// ICONOS
-              Builder(
+        child: Column(
+          children: [
+            /// HEADER
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Builder(
                 builder: (context) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu, size: 30),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
+                    /// MENÚ
+                    GestureDetector(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.menu,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.account_circle, size: 32),
-                      onPressed: () {
+
+                    /// PERFIL
+                    GestureDetector(
+                      onTap: () {
                         navegarRapido(
                           context,
                           PerfilUsuario(
@@ -72,412 +81,545 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                           ),
                         );
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_circle,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 10),
+            /// CONTENIDO SCROLLEABLE
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
 
-              /// SALUDO
-              const Text(
-                "¡Hola!",
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                nombreCorto,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// BUSCADOR
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Buscar",
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              /// REGISTRAR
-              widget.rol == "entrenador"
-                  ? InkWell(
-                      onTap: () {
-                        navegarRapido(
-                          context,
-                          VerEntrenamientosEntrenador(
-                            idUsuario: widget.idUsuario,
-                            nombreCompleto: widget.nombreCompleto,
-                            rol: widget.rol,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4A76B8),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              "assets/images/registrar_entrenamiento.png",
-                              width: 60,
-                            ), // 🔥 ICONO NUEVO
-                            const SizedBox(width: 15),
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Ver Entrenamientos",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "Consulta tus rutinas",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                    /// SALUDO
+                    const Text(
+                      "¡Hola!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
                       ),
-                    )
-                  : InkWell(
-                      onTap: () {
-                        navegarRapido(
-                          context,
-                          RegistrarEntrenamiento(
-                            idUsuario: widget.idUsuario,
-                            nombreCompleto: widget.nombreCompleto,
-                            rol: widget.rol,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4A76B8),
-                          borderRadius: BorderRadius.circular(12),
+                    ),
+                    Text(
+                      nombreCorto,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// BUSCADOR
+                    TextField(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Buscar...",
+                        hintStyle: const TextStyle(color: Color(0xFF7C86A2)),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Color(0xFF7C86A2),
                         ),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              "assets/images/registrar_entrenamiento.png",
-                              width: 60,
-                            ),
-                            const SizedBox(width: 15),
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Inscripción Equipos",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "¡Inscribete aquí!",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ],
+                        filled: true,
+                        fillColor: const Color(0xFF1B2340),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFF2E3A5F)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF2F80ED),
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
 
-              const SizedBox(height: 20),
+                    const SizedBox(height: 25),
 
-              /// TARJETAS
-              Row(
-                children: [
-                  /// MIS ENTRENAMIENTOS
-                  widget.rol == "entrenador"
-                      ? Expanded(
-                          child: InkWell(
+                    /// SECCIÓN TÍTULO
+                    const Text(
+                      "Accesos rápidos",
+                      style: TextStyle(
+                        color: Color(0xFF9FA8C3),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    /// TARJETA PRINCIPAL — REGISTRAR / VER ENTRENAMIENTOS
+                    widget.rol == "entrenador"
+                        ? _tarjetaPrincipal(
+                            titulo: "Ver Entrenamientos",
+                            subtitulo: "Consulta tus rutinas",
+                            gradientColors: [
+                              const Color(0xFF2F80ED),
+                              const Color(0xFF1E5DBF),
+                            ],
+                            icono: Icons.fitness_center,
                             onTap: () {
                               navegarRapido(
                                 context,
-                                GestionEspacios(
+                                VerEntrenamientosEntrenador(
                                   idUsuario: widget.idUsuario,
                                   nombreCompleto: widget.nombreCompleto,
                                   rol: widget.rol,
                                 ),
                               );
                             },
-                            child: Container(
-                              padding: const EdgeInsets.all(14),
-                              height: 130,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE84141),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Image.asset(
-                                    "assets/images/espacios.png",
-                                    width: 60,
-                                  ), // 🔥 ICONO NUEVO
-                                  const Spacer(),
-                                  const Text(
-                                    "Espacios",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Text(
-                                    "Añade, modifica o elimina",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          )
+                        : _tarjetaPrincipal(
+                            titulo: "Inscripción Equipos",
+                            subtitulo: "¡Inscríbete aquí!",
+                            gradientColors: [
+                              const Color(0xFF2F80ED),
+                              const Color(0xFF1E5DBF),
+                            ],
+                            icono: Icons.sports,
+                            onTap: () {
+                              navegarRapido(
+                                context,
+                                RegistrarEntrenamiento(
+                                  idUsuario: widget.idUsuario,
+                                  nombreCompleto: widget.nombreCompleto,
+                                  rol: widget.rol,
+                                ),
+                              );
+                            },
                           ),
-                        )
-                      : Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              navegarRapido(
-                                context,
-                                MisEntrenamientos(
-                                  idUsuario: widget.idUsuario,
-                                  nombreCompleto: widget.nombreCompleto,
-                                  rol: widget.rol,
+
+                    const SizedBox(height: 16),
+
+                    /// TARJETAS SECUNDARIAS — FILA
+                    Row(
+                      children: [
+                        /// ESPACIOS / MIS EQUIPOS
+                        widget.rol == "entrenador"
+                            ? Expanded(
+                                child: _tarjetaSecundaria(
+                                  titulo: "Espacios",
+                                  subtitulo: "Añade, modifica o elimina",
+                                  gradientColors: [
+                                    const Color(0xFFE84141),
+                                    const Color(0xFFB52F2F),
+                                  ],
+                                  icono: Icons.place,
+                                  onTap: () {
+                                    navegarRapido(
+                                      context,
+                                      GestionEspacios(
+                                        idUsuario: widget.idUsuario,
+                                        nombreCompleto: widget.nombreCompleto,
+                                        rol: widget.rol,
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
+                              )
+                            : Expanded(
+                                child: _tarjetaSecundaria(
+                                  titulo: "Mis Equipos",
+                                  subtitulo: "Ver tus equipos activos",
+                                  gradientColors: [
+                                    const Color(0xFFE84141),
+                                    const Color(0xFFB52F2F),
+                                  ],
+                                  icono: Icons.group,
+                                  onTap: () {
+                                    navegarRapido(
+                                      context,
+                                      MisEntrenamientos(
+                                        idUsuario: widget.idUsuario,
+                                        nombreCompleto: widget.nombreCompleto,
+                                        rol: widget.rol,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+
+                        const SizedBox(width: 14),
+
+                        /// EQUIPOS / RESUMEN
+                        Expanded(
+                          child: _tarjetaSecundaria(
+                            titulo: widget.rol == "entrenador"
+                                ? "Equipos"
+                                : "Resumen",
+                            subtitulo: widget.rol == "entrenador"
+                                ? "Gestiona tus equipos"
+                                : "Ver tus próximas actividades",
+                            gradientColors: [
+                              const Color(0xFFCE943D),
+                              const Color(0xFFA87020),
+                            ],
+                            icono: widget.rol == "entrenador"
+                                ? Icons.emoji_events
+                                : Icons.bar_chart,
+                            onTap: () {
+                              if (widget.rol == "entrenador") {
+                                navegarRapido(
+                                  context,
+                                  EquiposEntrenador(idUsuario: widget.idUsuario),
+                                );
+                              } else {
+                                navegarRapido(
+                                  context,
+                                  Resumen(
+                                    idUsuario: widget.idUsuario,
+                                    nombreCompleto: widget.nombreCompleto,
+                                    rol: widget.rol,
+                                  ),
+                                );
+                              }
                             },
-                            child: Container(
-                              padding: const EdgeInsets.all(14),
-                              height: 130,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE84141),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Image.asset(
-                                    "assets/images/mis_entrenamientos.png",
-                                    width: 60,
-                                  ),
-                                  const Spacer(),
-                                  const Text(
-                                    "Mis Equipos",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Text(
-                                    "Ver tus equipos activos",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ),
+                      ],
+                    ),
 
-                  const SizedBox(width: 15),
+                    const SizedBox(height: 16),
 
-                  /// RESUMEN / EQUIPOS
-                  Expanded(
-                    child: InkWell(
+                    /// HISTORIAL
+                    GestureDetector(
                       onTap: () {
-                        if (widget.rol == "entrenador") {
-                          navegarRapido(
-                            context,
-                            EquiposEntrenador(idUsuario: widget.idUsuario),
-                          );
-                        } else {
-                          navegarRapido(
-                            context,
-                            Resumen(
-                              idUsuario: widget.idUsuario,
-                              nombreCompleto: widget.nombreCompleto,
-                              rol: widget.rol,
-                            ),
-                          );
-                        }
+                        navegarRapido(
+                          context,
+                          Historial(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
+                          ),
+                        );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(14),
-                        height: 130,
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 206, 148, 61),
-                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFF2E3A5F)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Image.asset(
-                              widget.rol == "entrenador"
-                                  ? "assets/images/equipos.png"
-                                  : "assets/images/resumen.png",
-                              width: 60,
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF2F80ED),
+                                    Color(0xFF1E5DBF),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.history,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Historial",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                SizedBox(height: 3),
+                                Text(
+                                  "Mira tu historial deportivo",
+                                  style: TextStyle(
+                                    color: Color(0xFF9FA8C3),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                             const Spacer(),
-                            Text(
-                              widget.rol == "entrenador"
-                                  ? "Equipos"
-                                  : "Resumen",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              widget.rol == "entrenador"
-                                  ? "Gestiona tus equipos"
-                                  : "Ver tus próximas actividades",
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Color(0xFF7C86A2),
+                              size: 14,
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 20),
-
-              /// HISTORIAL
-              InkWell(
-                onTap: () {
-                  navegarRapido(
-                    context,
-                    Historial(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Image.asset("assets/images/historial.png", width: 60),
-                      const SizedBox(width: 15),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Historial",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          Text(
-                            "Mira tu historial deportivo",
-                            style: TextStyle(fontSize: 12, color: Colors.blue),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    const SizedBox(height: 80),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
 
-      /// 🔥 BOTTOM NAV CORREGIDO
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: indiceSeleccionado,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 1) {
-            navegarRapido(
-              context,
-              CalendarioUsuario(
-                idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
-                rol: widget.rol,
-              ),
-            );
-          } else if (index == 2) {
-            if (widget.rol == "entrenador") {
+      /// BOTTOM NAV
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1B2340),
+          border: Border(
+            top: BorderSide(color: Color(0xFF2E3A5F), width: 1),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: indiceSeleccionado,
+          selectedItemColor: const Color(0xFF2F80ED),
+          unselectedItemColor: const Color(0xFF7C86A2),
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          onTap: (index) {
+            if (index == 1) {
               navegarRapido(
                 context,
-                RegistroEspacio(
+                CalendarioUsuario(
                   idUsuario: widget.idUsuario,
                   nombreCompleto: widget.nombreCompleto,
                   rol: widget.rol,
                 ),
               );
-            } else {
+            } else if (index == 2) {
+              if (widget.rol == "entrenador") {
+                navegarRapido(
+                  context,
+                  RegistroEspacio(
+                    idUsuario: widget.idUsuario,
+                    nombreCompleto: widget.nombreCompleto,
+                    rol: widget.rol,
+                  ),
+                );
+              } else {
+                navegarRapido(
+                  context,
+                  RegistrarEntrenamiento(
+                    idUsuario: widget.idUsuario,
+                    nombreCompleto: widget.nombreCompleto,
+                    rol: widget.rol,
+                  ),
+                );
+              }
+            } else if (index == 3) {
               navegarRapido(
                 context,
-                RegistrarEntrenamiento(
+                NotificacionesUsuario(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            } else if (index == 4) {
+              navegarRapido(
+                context,
+                PerfilUsuario(
                   idUsuario: widget.idUsuario,
                   nombreCompleto: widget.nombreCompleto,
                   rol: widget.rol,
                 ),
               );
             }
-          } else if (index == 3) {
-            navegarRapido(
-              context,
-              NotificacionesUsuario(
-                idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
-                rol: widget.rol,
-              ),
-            );
-          } else if (index == 4) {
-            navegarRapido(
-              context,
-              PerfilUsuario(
-                idUsuario: widget.idUsuario,
-                nombreCompleto: widget.nombreCompleto,
-                rol: widget.rol,
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, size: 40),
-            label: "",
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: ""),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_rounded, size: 42),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: "",
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ─── WIDGET: TARJETA PRINCIPAL (ancho completo) ───────────────────────────
+  Widget _tarjetaPrincipal({
+    required String titulo,
+    required String subtitulo,
+    required List<Color> gradientColors,
+    required IconData icono,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-        ],
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.last.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icono,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitulo,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white70,
+              size: 14,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ─── WIDGET: TARJETA SECUNDARIA (media pantalla) ──────────────────────────
+  Widget _tarjetaSecundaria({
+    required String titulo,
+    required String subtitulo,
+    required List<Color> gradientColors,
+    required IconData icono,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 140,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.last.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icono,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              titulo,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              subtitulo,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
