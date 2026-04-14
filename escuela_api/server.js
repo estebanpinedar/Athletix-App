@@ -928,9 +928,10 @@ app.get("/equipos/:id/horario", async (req, res) => {
 
 //INSCRIPCIÓN + VALIDACIÓN CAPACIDAD
 app.post("/inscribir", async (req, res) => {
-  const id_usuario = req.query.id_usuario;
+  const { id_equipo, id_usuario } = req.body;
 
   try {
+    // 🔥 VALIDAR CAPACIDAD
     const inscritos = await db.execute({
       sql: "SELECT COUNT(*) as total FROM inscripcion WHERE id_equipo = ?",
       args: [id_equipo],
@@ -948,12 +949,12 @@ app.post("/inscribir", async (req, res) => {
       });
     }
 
-    // después del insert
+    // 🔥 INSERTAR INSCRIPCIÓN
     await db.execute({
       sql: `
-    INSERT INTO inscripcion (id_equipo, id_usuario)
-    VALUES (?, ?)
-  `,
+        INSERT INTO inscripcion (id_equipo, id_usuario)
+        VALUES (?, ?)
+      `,
       args: [id_equipo, id_usuario],
     });
 
@@ -966,9 +967,9 @@ app.post("/inscribir", async (req, res) => {
     res.json({ success: true });
 
   } catch (e) {
+    console.log("ERROR INSCRIPCION:", e);
     res.json({ success: false, msg: e.message });
   }
-
 });
 
 //EQUIPOS FILTRADOS
