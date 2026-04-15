@@ -118,7 +118,7 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
+      backgroundColor: const Color(0xFF12192D),
 
       drawer: DrawerMenu(
         idUsuario: widget.idUsuario,
@@ -131,18 +131,41 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
           children: [
             /// HEADER
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               child: Builder(
                 builder: (context) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu, size: 30),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    /// MENÚ
+                    GestureDetector(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.menu,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.account_circle, size: 32),
-                      onPressed: () {
+
+                    /// TÍTULO
+                    const Text(
+                      "Calendario",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    /// PERFIL
+                    GestureDetector(
+                      onTap: () {
                         navegarRapido(
                           context,
                           PerfilUsuario(
@@ -152,25 +175,37 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                           ),
                         );
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_circle,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            /// 🔥 CALENDARIO BONITO
+            /// CALENDARIO
             Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade300),
+                color: const Color(0xFF1B2340),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFF2E3A5F)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -195,19 +230,29 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                   });
                 },
 
-                calendarStyle: CalendarStyle(
-                  todayDecoration: const BoxDecoration(
-                    color: Colors.blue,
+                calendarStyle: const CalendarStyle(
+                  defaultTextStyle: TextStyle(color: Color(0xFFCDD5E0)),
+                  weekendTextStyle: TextStyle(color: Color(0xFF9FA8C3)),
+                  disabledTextStyle: TextStyle(color: Color(0xFF3A4560)),
+                  outsideTextStyle: TextStyle(color: Color(0xFF3A4560)),
+                  todayDecoration: BoxDecoration(
+                    color: Color(0xFF2F80ED),
                     shape: BoxShape.circle,
                   ),
-                  selectedDecoration: const BoxDecoration(
-                    color: Colors.black,
+                  todayTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Color(0xFF1E5DBF),
                     shape: BoxShape.circle,
                   ),
-
-                  /// 🔴 punticos
-                  markerDecoration: const BoxDecoration(
-                    color: Colors.red,
+                  selectedTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  markerDecoration: BoxDecoration(
+                    color: Color(0xFFE84141),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -216,49 +261,179 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
                   formatButtonVisible: false,
                   titleCentered: true,
                   titleTextStyle: TextStyle(
-                    fontSize: 20,
+                    color: Colors.white,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                  ),
+                  leftChevronIcon: Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF9FA8C3),
+                  ),
+                  rightChevronIcon: Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF9FA8C3),
+                  ),
+                ),
+
+                daysOfWeekStyle: const DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: Color(0xFF7C86A2),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: Color(0xFF7C86A2),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
                 ),
               ),
             ),
 
-            /// 🔥 LISTA DE ENTRENAMIENTOS
+            const SizedBox(height: 20),
+
+            /// TÍTULO SECCIÓN EVENTOS
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2F80ED), Color(0xFF1E5DBF)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Entrenamientos del día",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// LISTA DE ENTRENAMIENTOS
             Expanded(
               child: eventosSeleccionados.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No hay entrenamientos este día",
-                        style: TextStyle(fontSize: 16),
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1B2340),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: const Icon(
+                              Icons.event_busy,
+                              color: Color(0xFF7C86A2),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          const Text(
+                            "No hay entrenamientos este día",
+                            style: TextStyle(
+                              color: Color(0xFF7C86A2),
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: eventosSeleccionados.length,
                       itemBuilder: (context, index) {
                         final e = eventosSeleccionados[index];
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade400),
+                            color: const Color(0xFF1B2340),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: const Color(0xFF2E3A5F)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.sports),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "${e["nombre"]} - ${e["hora"]}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF2F80ED),
+                                      Color(0xFF1E5DBF),
+                                    ],
                                   ),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
+                                child: const Icon(
+                                  Icons.sports,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      e["nombre"] ?? "",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          color: Color(0xFF7C86A2),
+                                          size: 13,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          e["hora"] ?? "",
+                                          style: const TextStyle(
+                                            color: Color(0xFF9FA8C3),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Color(0xFF7C86A2),
+                                size: 14,
                               ),
                             ],
                           ),
@@ -270,74 +445,92 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
         ),
       ),
 
-      /// NAV BAR
-      bottomNavigationBar: BottomNavigationBar(
-  currentIndex: 1,
-  selectedItemColor: Colors.blue,
-  unselectedItemColor: Colors.grey,
-  type: BottomNavigationBarType.fixed,
-  onTap: (index) {
-    if (index == 0) {
-      navegarRapido(
-        context,
-        InicioUsuario(
-          nombreCompleto: widget.nombreCompleto,
-          idUsuario: widget.idUsuario,
-          rol: widget.rol,
-        ),
-      );
-    } else if (index == 2) {
-      if (widget.rol == "entrenador") {
-        navegarRapido(
-          context,
-          RegistroEspacio(
-            idUsuario: widget.idUsuario,
-            nombreCompleto: widget.nombreCompleto,
-            rol: widget.rol,
+      /// BOTTOM NAV
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1B2340),
+          border: Border(
+            top: BorderSide(color: Color(0xFF2E3A5F), width: 1),
           ),
-        );
-      } else {
-        navegarRapido(
-          context,
-          RegistrarEntrenamiento(
-            idUsuario: widget.idUsuario,
-            nombreCompleto: widget.nombreCompleto,
-            rol: widget.rol,
-          ),
-        );
-      }
-    } else if (index == 3) {
-      navegarRapido(
-        context,
-        NotificacionesUsuario(
-          idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto,
-          rol: widget.rol,
         ),
-      );
-    } else if (index == 4) {
-      navegarRapido(
-        context,
-        PerfilUsuario(
-          idUsuario: widget.idUsuario,
-          nombreCompleto: widget.nombreCompleto,
-          rol: widget.rol,
+        child: BottomNavigationBar(
+          currentIndex: 1,
+          selectedItemColor: const Color(0xFF2F80ED),
+          unselectedItemColor: const Color(0xFF7C86A2),
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          onTap: (index) {
+            if (index == 0) {
+              navegarRapido(
+                context,
+                InicioUsuario(
+                  nombreCompleto: widget.nombreCompleto,
+                  idUsuario: widget.idUsuario,
+                  rol: widget.rol,
+                ),
+              );
+            } else if (index == 2) {
+              if (widget.rol == "entrenador") {
+                navegarRapido(
+                  context,
+                  RegistroEspacio(
+                    idUsuario: widget.idUsuario,
+                    nombreCompleto: widget.nombreCompleto,
+                    rol: widget.rol,
+                  ),
+                );
+              } else {
+                navegarRapido(
+                  context,
+                  RegistrarEntrenamiento(
+                    idUsuario: widget.idUsuario,
+                    nombreCompleto: widget.nombreCompleto,
+                    rol: widget.rol,
+                  ),
+                );
+              }
+            } else if (index == 3) {
+              navegarRapido(
+                context,
+                NotificacionesUsuario(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            } else if (index == 4) {
+              navegarRapido(
+                context,
+                PerfilUsuario(
+                  idUsuario: widget.idUsuario,
+                  nombreCompleto: widget.nombreCompleto,
+                  rol: widget.rol,
+                ),
+              );
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: ""),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_rounded, size: 42),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: "",
+            ),
+          ],
         ),
-      );
-    }
-  },
-
-  items: const [
-    BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-    BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: ""),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.add_circle, size: 40),
-      label: "",
-    ),
-    BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ""),
-    BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-  ],
-),
+      ),
     );
   }
 }

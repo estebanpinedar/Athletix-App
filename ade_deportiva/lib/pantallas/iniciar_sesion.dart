@@ -13,11 +13,9 @@ class IniciarSesion extends StatefulWidget {
 class _IniciarSesionState extends State<IniciarSesion> {
   bool obscurePassword = true;
 
-  // CONTROLADORES
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  /// 🔐 FUNCIÓN LOGIN
   Future<void> login(BuildContext context) async {
     var url = Uri.parse("https://escuela-deportiva-project.onrender.com/login");
 
@@ -36,7 +34,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
       if (data["success"] == true) {
         int id = int.parse(data["id"].toString());
         String nombre = data["nombre"];
-        String rol = data["rol"]; // 🔥 ESTE ES EL NUEVO
+        String rol = data["rol"];
 
         Navigator.pushReplacement(
           context,
@@ -44,7 +42,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
             builder: (context) => InicioUsuario(
               nombreCompleto: nombre,
               idUsuario: id,
-              rol: rol, // 🔥 SE ENVÍA AQUÍ
+              rol: rol,
             ),
           ),
         );
@@ -56,11 +54,10 @@ class _IniciarSesionState extends State<IniciarSesion> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
+      ).showSnackBar(SnackBar(content: Text("Error de conexi�n: $e")));
     }
   }
 
-  /// DIÁLOGO RECUPERAR CONTRASEÑA
   void _mostrarDialogoRecuperarContrasena(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
 
@@ -85,7 +82,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              /// ICONO
               Container(
                 width: 60,
                 height: 60,
@@ -101,10 +97,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                   size: 28,
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              /// TITULO
               const Text(
                 "Recuperar contraseña",
                 textAlign: TextAlign.center,
@@ -114,18 +107,13 @@ class _IniciarSesionState extends State<IniciarSesion> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               const Text(
                 "Ingresa tu correo electrónico para restablecer tu contraseña",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color(0xFF9FA8C3), fontSize: 13),
               ),
-
               const SizedBox(height: 20),
-
-              /// INPUT EMAIL
               TextField(
                 controller: emailController,
                 style: const TextStyle(color: Colors.white),
@@ -148,10 +136,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 25),
-
-              /// BOTÓN ENVIAR
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -189,10 +174,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              /// BOTÓN CANCELAR
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
@@ -216,7 +198,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
       body: SafeArea(
         child: Column(
           children: [
-            /// 🔙 BOTÓN REGRESAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -241,18 +222,14 @@ class _IniciarSesionState extends State<IniciarSesion> {
                 ],
               ),
             ),
-
-            /// CONTENIDO
             Expanded(
               child: Stack(
                 children: [
-                  /// CONTENIDO CENTRADO
                   Center(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
-                          /// TARJETA COMPLETA
                           Container(
                             width: double.infinity,
                             constraints: const BoxConstraints(maxWidth: 420),
@@ -274,7 +251,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                /// ICONO
                                 Center(
                                   child: Container(
                                     width: 70,
@@ -295,10 +271,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 25),
-
-                                /// TITULO
                                 const Text(
                                   "Bienvenido",
                                   textAlign: TextAlign.center,
@@ -308,9 +281,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-
                                 const SizedBox(height: 6),
-
                                 const Text(
                                   "Sistema Gestor de Escuelas Deportivas",
                                   textAlign: TextAlign.center,
@@ -319,10 +290,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     fontSize: 14,
                                   ),
                                 ),
-
                                 const SizedBox(height: 30),
-
-                                /// EMAIL
                                 const Text(
                                   "CORREO ELECTRÓNICO",
                                   style: TextStyle(
@@ -331,9 +299,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-
                                 const SizedBox(height: 8),
-
                                 TextField(
                                   controller: emailController,
                                   style: const TextStyle(color: Colors.white),
@@ -363,10 +329,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 18),
-
-                                /// PASSWORD
                                 const Text(
                                   "CONTRASEÑA",
                                   style: TextStyle(
@@ -375,9 +338,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-
                                 const SizedBox(height: 8),
-
                                 TextField(
                                   controller: passwordController,
                                   obscureText: obscurePassword,
@@ -387,8 +348,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                       Icons.lock,
                                       color: Color(0xFF7C86A2),
                                     ),
-
-                                    /// 👁️ BOTÓN FUNCIONAL
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         obscurePassword
@@ -402,7 +361,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                         });
                                       },
                                     ),
-
                                     hintText: "••••••••",
                                     hintStyle: const TextStyle(
                                       color: Color(0xFF7C86A2),
@@ -424,10 +382,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 25),
-
-                                /// BOTON LOGIN
                                 SizedBox(
                                   height: 55,
                                   child: Container(
@@ -445,9 +400,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
+                                          borderRadius: BorderRadius.circular(18),
                                         ),
                                       ),
                                       onPressed: () {
@@ -464,10 +417,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 15),
-
-                                /// RECUPERAR
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
@@ -483,19 +433,14 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 20),
-
-                                /// DIVISOR
                                 Row(
                                   children: const [
                                     Expanded(
                                       child: Divider(color: Color(0xFF2E3A5F)),
                                     ),
                                     Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 10),
                                       child: Text(
                                         "O",
                                         style: TextStyle(
@@ -508,10 +453,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 20),
-
-                                /// REGISTRO
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -538,21 +480,18 @@ class _IniciarSesionState extends State<IniciarSesion> {
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 80),
                         ],
                       ),
                     ),
                   ),
-
-                  /// TEXTO FIJO ABAJO
                   Positioned(
                     bottom: 20,
                     left: 0,
                     right: 0,
                     child: const Center(
                       child: Text(
-                        "Plataforma segura de gestión deportiva",
+                        "",
                         style: TextStyle(
                           color: Color(0xFF7C86A2),
                           fontSize: 12,

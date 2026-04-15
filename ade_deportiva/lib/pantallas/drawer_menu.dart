@@ -22,51 +22,100 @@ class _DrawerMenuState extends State<DrawerMenu> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFF1B2340),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFF2E3A5F)),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            /// ÍCONO
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.orange,
+                size: 30,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             const Text(
               "¿Está seguro que quiere cerrar sesión?",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 6),
+
+            const Text(
+              "Tendrás que volver a iniciar sesión.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF9FA8C3),
+              ),
+            ),
+
+            const SizedBox(height: 24),
 
             /// BOTÓN CONFIRMAR
             SizedBox(
-              width: 220,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              width: double.infinity,
+              height: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2F80ED), Color(0xFF1E5DBF)],
                   ),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  navegarRapido(context, const PrincipalWidget());
-                },
-                child: const Text(
-                  "Confirmar",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    navegarRapido(context, const PrincipalWidget());
+                  },
+                  child: const Text(
+                    "Confirmar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             /// BOTÓN CANCELAR
             SizedBox(
-              width: 150,
+              width: double.infinity,
+              height: 46,
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade200,
-                  side: BorderSide(color: Colors.grey.shade400),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: const BorderSide(color: Color(0xFF2E3A5F)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 onPressed: () {
@@ -74,7 +123,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 },
                 child: const Text(
                   "Cancelar",
-                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  style: TextStyle(color: Color(0xFF9FA8C3), fontSize: 14),
                 ),
               ),
             ),
@@ -90,178 +139,330 @@ class _DrawerMenuState extends State<DrawerMenu> {
     navegarRapido(context, pantalla);
   }
 
+  /// ─── WIDGET: ITEM DEL DRAWER ──────────────────────────────────────────────
+  Widget _drawerItem({
+    required IconData icono,
+    required String titulo,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B2340),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF2E3A5F)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: (iconColor ?? const Color(0xFF2F80ED)).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icono,
+                color: iconColor ?? const Color(0xFF2F80ED),
+                size: 19,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              titulo,
+              style: TextStyle(
+                color: textColor ?? Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: iconColor ?? const Color(0xFF7C86A2),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFFE8EEF2),
-      child: Column(
-        children: [
-          /// HEADER
-          Container(
-            height: 100,
-            alignment: Alignment.bottomLeft,
-            padding: const EdgeInsets.only(left: 16, bottom: 12),
-            child: const Text(
-              "Menú",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          /// OPCIONES
-          Expanded(
-            child: ListView(
-              children: [
-                /// INICIO
-                ListTile(
-                  leading: const Icon(Icons.home),
-                  title: const Text("Inicio"),
-                  onTap: () => _navegar(
-                    InicioUsuario(
-                      nombreCompleto: widget.nombreCompleto,
-                      idUsuario: widget.idUsuario,
-                      rol: widget.rol,
-                    ),
+      backgroundColor: const Color(0xFF12192D),
+      child: SafeArea(
+        child: Column(
+          children: [
+            /// HEADER
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1B2340),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF2E3A5F)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-
-                /// PERFIL
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text("Perfil de usuario"),
-                  onTap: () => _navegar(
-                    PerfilUsuario(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  ),
-                ),
-
-                /// 🔥 OPCIONES SEGÚN ROL
-                if (widget.rol == "alumno") ...[
-                  ListTile(
-                    leading: const Icon(Icons.add_box),
-                    title: const Text("Registrar entrenamiento"),
-                    onTap: () => _navegar(
-                      RegistrarEntrenamiento(
-                        idUsuario: widget.idUsuario,
-                        nombreCompleto: widget.nombreCompleto,
-                        rol: widget.rol,
+                ],
+              ),
+              child: Row(
+                children: [
+                  /// AVATAR
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2F80ED), Color(0xFF1E5DBF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: Colors.white,
+                      size: 28,
                     ),
                   ),
 
-                  ListTile(
-                    leading: const Icon(Icons.fitness_center),
-                    title: const Text("Mis entrenamientos"),
-                    onTap: () => _navegar(
-                      MisEntrenamientos(
-                        idUsuario: widget.idUsuario,
-                        nombreCompleto: widget.nombreCompleto,
-                        rol: widget.rol,
-                      ),
-                    ),
-                  ),
-                ] else if (widget.rol == "entrenador") ...[
-                  ListTile(
-                    leading: const Icon(Icons.visibility),
-                    title: const Text("Ver entrenamientos"),
-                    onTap: () => _navegar(
-                      VerEntrenamientosEntrenador(
-                        idUsuario: widget.idUsuario,
-                        nombreCompleto: widget.nombreCompleto,
-                        rol: widget.rol,
-                      ),
-                    ),
-                  ),
+                  const SizedBox(width: 14),
 
-                  ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: const Text("Espacios"),
-                    onTap: () => _navegar(
-                      GestionEspacios(
-                        idUsuario: widget.idUsuario,
-                        nombreCompleto: widget.nombreCompleto,
-                        rol: widget.rol,
-                      ),
-                    ),
-                  ),
-
-                  // 🔥 NUEVO: EQUIPOS
-                  ListTile(
-                    leading: const Icon(Icons.groups),
-                    title: const Text("Equipos"),
-                    onTap: () => _navegar(
-                      EquiposEntrenador(idUsuario: widget.idUsuario),
+                  /// NOMBRE Y ROL
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.nombreCompleto,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2F80ED).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: const Color(0xFF2F80ED).withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
+                            widget.rol[0].toUpperCase() +
+                                widget.rol.substring(1),
+                            style: const TextStyle(
+                              color: Color(0xFF2F80ED),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-
-                /// 🔥 COMUNES (AMBOS)
-                ListTile(
-                  leading: const Icon(Icons.calendar_today),
-                  title: const Text("Calendario"),
-                  onTap: () => _navegar(
-                    CalendarioUsuario(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.notifications),
-                  title: const Text("Notificaciones"),
-                  onTap: () => _navegar(
-                    NotificacionesUsuario(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.assignment),
-                  title: const Text("Resumen"),
-                  onTap: () => _navegar(
-                    Resumen(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  ),
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.history),
-                  title: const Text("Historial"),
-                  onTap: () => _navegar(
-                    Historial(
-                      idUsuario: widget.idUsuario,
-                      nombreCompleto: widget.nombreCompleto,
-                      rol: widget.rol,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// CERRAR SESIÓN
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                "Cerrar sesión",
-                style: TextStyle(color: Colors.red),
               ),
-              onTap: _mostrarDialogoCerrarSesion,
             ),
-          ),
-        ],
+
+            /// SEPARADOR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2F80ED),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Navegación",
+                    style: TextStyle(
+                      color: Color(0xFF9FA8C3),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// OPCIONES
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  /// INICIO
+                  _drawerItem(
+                    icono: Icons.home_rounded,
+                    titulo: "Inicio",
+                    onTap: () => _navegar(
+                      InicioUsuario(
+                        nombreCompleto: widget.nombreCompleto,
+                        idUsuario: widget.idUsuario,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+
+                  /// PERFIL
+                  _drawerItem(
+                    icono: Icons.person_rounded,
+                    titulo: "Perfil de usuario",
+                    onTap: () => _navegar(
+                      PerfilUsuario(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+
+                  /// 🔥 OPCIONES SEGÚN ROL
+                  if (widget.rol == "alumno") ...[
+                    _drawerItem(
+                      icono: Icons.add_box_rounded,
+                      titulo: "Registrar entrenamiento",
+                      onTap: () => _navegar(
+                        RegistrarEntrenamiento(
+                          idUsuario: widget.idUsuario,
+                          nombreCompleto: widget.nombreCompleto,
+                          rol: widget.rol,
+                        ),
+                      ),
+                    ),
+                    _drawerItem(
+                      icono: Icons.fitness_center_rounded,
+                      titulo: "Mis Equipos",
+                      onTap: () => _navegar(
+                        MisEntrenamientos(
+                          idUsuario: widget.idUsuario,
+                          nombreCompleto: widget.nombreCompleto,
+                          rol: widget.rol,
+                        ),
+                      ),
+                    ),
+                  ] else if (widget.rol == "entrenador") ...[
+                    _drawerItem(
+                      icono: Icons.visibility_rounded,
+                      titulo: "Ver entrenamientos",
+                      onTap: () => _navegar(
+                        VerEntrenamientosEntrenador(
+                          idUsuario: widget.idUsuario,
+                          nombreCompleto: widget.nombreCompleto,
+                          rol: widget.rol,
+                        ),
+                      ),
+                    ),
+                    _drawerItem(
+                      icono: Icons.location_on_rounded,
+                      titulo: "Espacios",
+                      onTap: () => _navegar(
+                        GestionEspacios(
+                          idUsuario: widget.idUsuario,
+                          nombreCompleto: widget.nombreCompleto,
+                          rol: widget.rol,
+                        ),
+                      ),
+                    ),
+                    _drawerItem(
+                      icono: Icons.groups_rounded,
+                      titulo: "Equipos",
+                      onTap: () => _navegar(
+                        EquiposEntrenador(idUsuario: widget.idUsuario),
+                      ),
+                    ),
+                  ],
+
+                  /// 🔥 COMUNES (AMBOS)
+                  _drawerItem(
+                    icono: Icons.calendar_month_rounded,
+                    titulo: "Calendario",
+                    onTap: () => _navegar(
+                      CalendarioUsuario(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+                  _drawerItem(
+                    icono: Icons.notifications_rounded,
+                    titulo: "Notificaciones",
+                    onTap: () => _navegar(
+                      NotificacionesUsuario(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+                  _drawerItem(
+                    icono: Icons.assignment_rounded,
+                    titulo: "Resumen",
+                    onTap: () => _navegar(
+                      Resumen(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+                  _drawerItem(
+                    icono: Icons.history_rounded,
+                    titulo: "Historial",
+                    onTap: () => _navegar(
+                      Historial(
+                        idUsuario: widget.idUsuario,
+                        nombreCompleto: widget.nombreCompleto,
+                        rol: widget.rol,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// CERRAR SESIÓN
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+              child: _drawerItem(
+                icono: Icons.logout_rounded,
+                titulo: "Cerrar sesión",
+                iconColor: Colors.redAccent,
+                textColor: Colors.redAccent,
+                onTap: _mostrarDialogoCerrarSesion,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

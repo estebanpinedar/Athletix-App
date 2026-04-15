@@ -78,7 +78,7 @@ class _PrincipalWidgetState extends State<PrincipalWidget>
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30),
                   child: Text(
-                    "¡Bienvenido a Athetix!",
+                    "¡Bienvenido a Athletix!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,

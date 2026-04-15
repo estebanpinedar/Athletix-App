@@ -169,7 +169,7 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
+      backgroundColor: const Color(0xFF12192D),
 
       /// DRAWER
       drawer: DrawerMenu(
@@ -183,59 +183,142 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
           children: [
             /// HEADER
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu, size: 30),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
-                  ),
-                  const Text(
-                    "Notificaciones",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.account_circle, size: 32),
-                    onPressed: () {
-                      navegarRapido(
-                        context,
-                        PerfilUsuario(
-                          idUsuario: widget.idUsuario,
-                          nombreCompleto: widget.nombreCompleto,
-                          rol: widget.rol,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Builder(
+                builder: (context) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    /// MENÚ
+                    GestureDetector(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
+                        child: const Icon(
+                          Icons.menu,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
+                    ),
+
+                    /// TÍTULO
+                    const Text(
+                      "Notificaciones",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    /// PERFIL
+                    GestureDetector(
+                      onTap: () {
+                        navegarRapido(
+                          context,
+                          PerfilUsuario(
+                            idUsuario: widget.idUsuario,
+                            nombreCompleto: widget.nombreCompleto,
+                            rol: widget.rol,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B2340),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_circle,
+                          color: Color(0xFF9FA8C3),
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// SUBTÍTULO / CONTADOR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2F80ED),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "${notificaciones.length} notificaciones",
+                    style: const TextStyle(
+                      color: Color(0xFF9FA8C3),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
 
             /// LISTA
             Expanded(
               child: cargando
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF2F80ED),
+                      ),
+                    )
                   : notificaciones.isEmpty
-                      ? const Center(
-                          child: Text("No hay notificaciones"),
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1B2340),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: const Icon(
+                                  Icons.notifications_off_rounded,
+                                  color: Color(0xFF7C86A2),
+                                  size: 30,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              const Text(
+                                "No hay notificaciones",
+                                style: TextStyle(
+                                  color: Color(0xFF7C86A2),
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       : ListView.builder(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemCount: notificaciones.length,
                           itemBuilder: (context, index) {
                             final n = notificaciones[index];
+                            final String tipo = n["tipo"] ?? "";
+                            final Color colorTipo = obtenerColor(tipo);
+                            final IconData iconoTipo = obtenerIcono(tipo);
 
                             return Dismissible(
                               key: Key(n["id_notificacion"].toString()),
@@ -243,34 +326,72 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                               onDismissed: (direction) {
                                 eliminarNotificacion(n["id_notificacion"]);
                               },
-
+                              background: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.only(left: 20),
+                                child: const Icon(
+                                  Icons.delete_rounded,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              secondaryBackground: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(
+                                  Icons.delete_rounded,
+                                  color: Colors.red,
+                                ),
+                              ),
                               child: Container(
-                                margin:
-                                    const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(12),
+                                  color: const Color(0xFF1B2340),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: const Color(0xFF2E3A5F),
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          Colors.black.withOpacity(0.05),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
+                                      color: Colors.black.withOpacity(0.25),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.notifications,
-                                      color:
-                                          obtenerColor(n["tipo"] ?? ""),
-                                      size: 35,
+                                    /// ÍCONO CON COLOR SEGÚN TIPO
+                                    Container(
+                                      width: 46,
+                                      height: 46,
+                                      decoration: BoxDecoration(
+                                        color: colorTipo.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: colorTipo.withOpacity(0.35),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        iconoTipo,
+                                        color: colorTipo,
+                                        size: 22,
+                                      ),
                                     ),
-                                    const SizedBox(width: 15),
 
+                                    const SizedBox(width: 14),
+
+                                    /// TEXTO
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
@@ -279,21 +400,38 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                                           Text(
                                             n["mensaje"] ?? "",
                                             style: const TextStyle(
-                                              fontWeight:
-                                                  FontWeight.bold,
-                                              fontSize: 15,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
                                             ),
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            n["fecha"] ?? "",
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 13,
-                                            ),
+                                          const SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.access_time,
+                                                color: Color(0xFF7C86A2),
+                                                size: 12,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                n["fecha"] ?? "",
+                                                style: const TextStyle(
+                                                  color: Color(0xFF9FA8C3),
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
+                                    ),
+
+                                    /// FLECHA
+                                    const Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: Color(0xFF7C86A2),
+                                      size: 20,
                                     ),
                                   ],
                                 ),
@@ -306,25 +444,45 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
         ),
       ),
 
-      /// NAVBAR
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month), label: ""),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, size: 40),
-            label: "",
+      /// BOTTOM NAV
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1B2340),
+          border: Border(
+            top: BorderSide(color: Color(0xFF2E3A5F), width: 1),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-        ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          selectedItemColor: const Color(0xFF2F80ED),
+          unselectedItemColor: const Color(0xFF7C86A2),
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          onTap: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_rounded, size: 42),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_rounded),
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: "",
+            ),
+          ],
+        ),
       ),
     );
   }

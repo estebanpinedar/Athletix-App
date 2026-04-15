@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class MisEntrenamientos extends StatefulWidget {
   final int idUsuario;
@@ -23,7 +24,6 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
 
   List entrenamientos = [];
 
-  // 🔥 EXPANSIÓN
   Set<int> abiertos = {};
   Map<int, List> horarios = {};
   Map<int, String> horas = {};
@@ -34,9 +34,6 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
     obtenerMisInscripciones();
   }
 
-  // =========================
-  // TRAER INSCRIPCIONES
-  // =========================
   Future<void> obtenerMisInscripciones() async {
     var res = await http.get(
       Uri.parse("$api/mis-inscripciones/${widget.idUsuario}"),
@@ -49,9 +46,6 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
     });
   }
 
-  // =========================
-  // TRAER HORARIO
-  // =========================
   Future<void> obtenerHorario(int idEquipo) async {
     var res = await http.get(
       Uri.parse("$api/equipos/$idEquipo/horario"),
@@ -65,9 +59,6 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
     });
   }
 
-  // =========================
-  // DARSE DE BAJA
-  // =========================
   Future<void> darseDeBaja(int idEquipo) async {
     var res = await http.delete(
       Uri.parse("$api/inscripcion"),
@@ -93,40 +84,98 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1B2340),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFF2E3A5F)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE84141).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Color(0xFFE84141),
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
               "¿Deseas darte de baja?",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: 220,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  darseDeBaja(entrenamiento["id_equipo"]);
-                },
-                child: const Text("Confirmar",
-                    style: TextStyle(color: Colors.white)),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-
+            const SizedBox(height: 8),
+            const Text(
+              "Se eliminará tu inscripción de este equipo.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF7C86A2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE84141), Color(0xFFB52F2F)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    darseDeBaja(entrenamiento["id_equipo"]);
+                  },
+                  child: const Text(
+                    "Confirmar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 10),
-
-            OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF2E3A5F)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  backgroundColor: const Color(0xFF232C4A),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(color: Color(0xFF7C86A2)),
+                ),
+              ),
             ),
           ],
         ),
@@ -143,161 +192,278 @@ class _MisEntrenamientosState extends State<MisEntrenamientos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8EEF2),
-
+      backgroundColor: const Color(0xFF12192D),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// BACK
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1B2340),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF2E3A5F)),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Color(0xFF9FA8C3),
+                    size: 18,
+                  ),
                 ),
               ),
 
-              /// LOGO
-              Image.asset("assets/images/logo.png", height: 140),
+              const SizedBox(height: 14),
 
-              const SizedBox(height: 10),
-
-              /// TÍTULO
               const Text(
                 "Mis Equipos",
                 style: TextStyle(
-                  fontSize: 22,
+                  color: Colors.white,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 8),
 
-              /// LISTA
-              entrenamientos.isEmpty
-                  ? const Text("No tienes inscripciones")
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: entrenamientos.length,
-                      itemBuilder: (context, index) {
-                        final e = entrenamientos[index];
+              const Text(
+                "Consulta tus equipos inscritos y revisa sus horarios",
+                style: TextStyle(
+                  color: Color(0xFF9FA8C3),
+                  fontSize: 14,
+                ),
+              ),
 
-                        return GestureDetector(
-                          onTap: () async {
-                            setState(() {
-                              if (abiertos.contains(e["id_equipo"])) {
-                                abiertos.remove(e["id_equipo"]);
-                              } else {
-                                abiertos.add(e["id_equipo"]);
-                              }
-                            });
+              const SizedBox(height: 20),
 
-                            if (!horarios.containsKey(e["id_equipo"])) {
-                              await obtenerHorario(e["id_equipo"]);
-                            }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade400),
+              Expanded(
+                child: entrenamientos.isEmpty
+                    ? Center(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1B2340),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: const Color(0xFF2E3A5F),
                             ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.groups, size: 35),
-                                    const SizedBox(width: 12),
-
-                                    /// INFO
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${e["deporte"]} - ${e["categoria"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(e["nombre"]),
-                                        ],
-                                      ),
-                                    ),
-
-                                    /// FLECHA
-                                    Icon(
-                                      abiertos.contains(e["id_equipo"])
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                    ),
-
-                                    /// MENÚ
-                                    PopupMenuButton<String>(
-                                      onSelected: (value) =>
-                                          _onMenuOptionSelected(value, e),
-                                      itemBuilder: (context) => [
-                                        const PopupMenuItem(
-                                          value: "baja",
-                                          child:
-                                              Text("Darme de baja"),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                          ),
+                          child: const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.groups_rounded,
+                                color: Color(0xFF7C86A2),
+                                size: 46,
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                "No tienes inscripciones",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Cuando te inscribas a un equipo, aparecerá aquí.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF9FA8C3),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: entrenamientos.length,
+                        itemBuilder: (context, index) {
+                          final e = entrenamientos[index];
+                          final abierto = abiertos.contains(e["id_equipo"]);
 
-                                /// EXPANSIÓN
-                                if (abiertos.contains(e["id_equipo"]))
-                                  Column(
+                          return GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                if (abierto) {
+                                  abiertos.remove(e["id_equipo"]);
+                                } else {
+                                  abiertos.add(e["id_equipo"]);
+                                }
+                              });
+
+                              if (!horarios.containsKey(e["id_equipo"])) {
+                                await obtenerHorario(e["id_equipo"]);
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1B2340),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: const Color(0xFF2E3A5F),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.25),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
                                     children: [
-                                      const SizedBox(height: 12),
-                                      Divider(color: Colors.grey.shade400),
-                                      const SizedBox(height: 8),
-
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          "Horario:",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey.shade700,
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFF2F80ED),
+                                              Color(0xFF1E5DBF),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                        ),
+                                        child: const Icon(
+                                          Icons.groups_rounded,
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "${e["deporte"]} - ${e["categoria"]}",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              e["nombre"],
+                                              style: const TextStyle(
+                                                color: Color(0xFF9FA8C3),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        abierto
+                                            ? Icons.expand_less_rounded
+                                            : Icons.expand_more_rounded,
+                                        color: const Color(0xFF7C86A2),
+                                      ),
+                                      PopupMenuButton<String>(
+                                        color: const Color(0xFF1B2340),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          side: const BorderSide(
+                                            color: Color(0xFF2E3A5F),
                                           ),
                                         ),
-                                      ),
-
-                                      const SizedBox(height: 6),
-
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          "Días: ${(horarios[e["id_equipo"]] ?? []).join(", ")}",
+                                        icon: const Icon(
+                                          Icons.more_vert_rounded,
+                                          color: Color(0xFF7C86A2),
                                         ),
-                                      ),
-
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          "Hora: ${horas[e["id_equipo"]] ?? ""}",
-                                        ),
+                                        onSelected: (value) =>
+                                            _onMenuOptionSelected(value, e),
+                                        itemBuilder: (context) => const [
+                                          PopupMenuItem(
+                                            value: "baja",
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.logout_rounded,
+                                                  color: Color(0xFFE84141),
+                                                  size: 18,
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text(
+                                                  "Darme de baja",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                              ],
+                                  if (abierto)
+                                    Column(
+                                      children: [
+                                        const SizedBox(height: 12),
+                                        const Divider(
+                                          color: Color(0xFF2E3A5F),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        const Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "Horario",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "Días: ${(horarios[e["id_equipo"]] ?? []).join(", ")}",
+                                            style: const TextStyle(
+                                              color: Color(0xFF9FA8C3),
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "Hora: ${horas[e["id_equipo"]] ?? ""}",
+                                            style: const TextStyle(
+                                              color: Color(0xFF9FA8C3),
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-
-              const SizedBox(height: 20),
+                          );
+                        },
+                      ),
+              ),
             ],
           ),
         ),
