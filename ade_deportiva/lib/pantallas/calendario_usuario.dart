@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screens.dart';
+import '../widgets/curved_bottom_nav_bar.dart';
 
 class CalendarioUsuario extends StatefulWidget {
   final int idUsuario;
@@ -446,90 +447,63 @@ class _CalendarioUsuarioState extends State<CalendarioUsuario> {
       ),
 
       /// BOTTOM NAV
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF1B2340),
-          border: Border(
-            top: BorderSide(color: Color(0xFF2E3A5F), width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: 1,
-          selectedItemColor: const Color(0xFF2F80ED),
-          unselectedItemColor: const Color(0xFF7C86A2),
-          backgroundColor: Colors.transparent,
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          onTap: (index) {
-            if (index == 0) {
+      bottomNavigationBar: CurvedBottomNavBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 1) {
+            return;
+          }
+
+          if (index == 0) {
+            navegarRapido(
+              context,
+              InicioUsuario(
+                nombreCompleto: widget.nombreCompleto,
+                idUsuario: widget.idUsuario,
+                rol: widget.rol,
+              ),
+            );
+          } else if (index == 2) {
+            if (widget.rol == "entrenador") {
               navegarRapido(
                 context,
-                InicioUsuario(
-                  nombreCompleto: widget.nombreCompleto,
-                  idUsuario: widget.idUsuario,
-                  rol: widget.rol,
-                ),
-              );
-            } else if (index == 2) {
-              if (widget.rol == "entrenador") {
-                navegarRapido(
-                  context,
-                  RegistroEspacio(
-                    idUsuario: widget.idUsuario,
-                    nombreCompleto: widget.nombreCompleto,
-                    rol: widget.rol,
-                  ),
-                );
-              } else {
-                navegarRapido(
-                  context,
-                  RegistrarEntrenamiento(
-                    idUsuario: widget.idUsuario,
-                    nombreCompleto: widget.nombreCompleto,
-                    rol: widget.rol,
-                  ),
-                );
-              }
-            } else if (index == 3) {
-              navegarRapido(
-                context,
-                NotificacionesUsuario(
+                RegistroEspacio(
                   idUsuario: widget.idUsuario,
                   nombreCompleto: widget.nombreCompleto,
                   rol: widget.rol,
                 ),
               );
-            } else if (index == 4) {
+            } else {
               navegarRapido(
                 context,
-                PerfilUsuario(
+                RegistrarEntrenamiento(
                   idUsuario: widget.idUsuario,
                   nombreCompleto: widget.nombreCompleto,
                   rol: widget.rol,
                 ),
               );
             }
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: ""),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_rounded),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_rounded, size: 42),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_rounded),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: "",
-            ),
-          ],
-        ),
+          } else if (index == 3) {
+            navegarRapido(
+              context,
+              NotificacionesUsuario(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+                rol: widget.rol,
+              ),
+            );
+          } else if (index == 4) {
+            navegarRapido(
+              context,
+              PerfilUsuario(
+                idUsuario: widget.idUsuario,
+                nombreCompleto: widget.nombreCompleto,
+                rol: widget.rol,
+              ),
+            );
+          }
+        },
+        rol: widget.rol,
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screens.dart';
+import '../widgets/curved_bottom_nav_bar.dart';
 
 class NotificacionesUsuario extends StatefulWidget {
   final int idUsuario;
@@ -445,44 +446,10 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
       ),
 
       /// BOTTOM NAV
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF1B2340),
-          border: Border(
-            top: BorderSide(color: Color(0xFF2E3A5F), width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          selectedItemColor: const Color(0xFF2F80ED),
-          unselectedItemColor: const Color(0xFF7C86A2),
-          backgroundColor: Colors.transparent,
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_rounded),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_rounded, size: 42),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_rounded),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: "",
-            ),
-          ],
-        ),
+      bottomNavigationBar: CurvedBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+        rol: widget.rol,
       ),
     );
   }
