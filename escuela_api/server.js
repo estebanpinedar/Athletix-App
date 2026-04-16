@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import { db } from "./db.js";
 
 async function crearNotificacion(id_usuario, mensaje) {
@@ -21,6 +22,73 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const codigosRecuperacion = new Map();
+
+function generarCodigoRecuperacion() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function obtenerTransporteCorreo() {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE } = process.env;
+
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT),
+    secure: SMTP_SECURE === "true" || Number(SMTP_PORT) === 465,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
+}
+
+async function enviarCodigoRecuperacion(email, codigo) {
+  const transporte = obtenerTransporteCorreo();
+
+  if (!transporte) {
+    throw new Error(
+      "El servidor no tiene configurado el correo SMTP para recuperar contraseña"
+    );
+  }
+
+  await transporte.sendMail({
+    from: process.env.FROM_EMAIL || process.env.SMTP_USER,
+    to: email,
+    subject: "Codigo para recuperar tu contraseña",
+    text: `Tu codigo de recuperacion es: ${codigo}. Este codigo vence en 10 minutos.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #1b2340;">
+        <h2>Recuperacion de contraseña</h2>
+        <p>Tu codigo de recuperacion es:</p>
+        <p style="font-size: 28px; font-weight: bold; letter-spacing: 6px;">${codigo}</p>
+        <p>Este codigo vence en 10 minutos.</p>
+      </div>
+    `,
+  });
+}
+
+function validarCodigoRecuperacion(email, codigo) {
+  const recuperacion = codigosRecuperacion.get(email);
+
+  if (!recuperacion) {
+    return { valido: false, msg: "No hay un codigo activo para este correo" };
+  }
+
+  if (recuperacion.expiresAt < Date.now()) {
+    codigosRecuperacion.delete(email);
+    return { valido: false, msg: "El codigo ya vencio" };
+  }
+
+  if (recuperacion.code !== codigo) {
+    return { valido: false, msg: "El codigo es incorrecto" };
+  }
+
+  return { valido: true, userId: recuperacion.userId };
+}
 
 // =========================
 // 🔥 MIDDLEWARES
@@ -289,6 +357,125 @@ app.put("/usuario/password", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post("/password-reset/request", async (req, res) => {
+  const email = req.body?.email?.trim().toLowerCase();
+
+  if (!email) {
+    return res.json({
+      success: false,
+      msg: "Debes ingresar un correo",
+    });
+  }
+
+  try {
+    const result = await db.execute({
+      sql: "SELECT id_usuario FROM usuarios WHERE lower(email) = ?",
+      args: [email],
+    });
+
+    if (result.rows.length === 0) {
+      return res.json({
+        success: false,
+        msg: "El correo no esta registrado",
+      });
+    }
+
+    const codigo = generarCodigoRecuperacion();
+    const userId = result.rows[0].id_usuario;
+
+    codigosRecuperacion.set(email, {
+      code: codigo,
+      userId,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    });
+
+    await enviarCodigoRecuperacion(email, codigo);
+
+    res.json({
+      success: true,
+      msg: "Se envio un codigo de verificacion al correo",
+    });
+  } catch (error) {
+    console.log("ERROR REQUEST PASSWORD RESET:", error);
+    res.status(500).json({
+      success: false,
+      msg: error.message || "No se pudo enviar el codigo",
+    });
+  }
+});
+
+app.post("/password-reset/verify", async (req, res) => {
+  const email = req.body?.email?.trim().toLowerCase();
+  const code = req.body?.code?.trim();
+
+  if (!email || !code) {
+    return res.json({
+      success: false,
+      msg: "Correo y codigo son obligatorios",
+    });
+  }
+
+  const validacion = validarCodigoRecuperacion(email, code);
+
+  if (!validacion.valido) {
+    return res.json({
+      success: false,
+      msg: validacion.msg,
+    });
+  }
+
+  res.json({
+    success: true,
+    msg: "Codigo verificado correctamente",
+  });
+});
+
+app.post("/password-reset/confirm", async (req, res) => {
+  const email = req.body?.email?.trim().toLowerCase();
+  const code = req.body?.code?.trim();
+  const password = req.body?.password;
+
+  if (!email || !code || !password) {
+    return res.json({
+      success: false,
+      msg: "Correo, codigo y contraseña son obligatorios",
+    });
+  }
+
+  const validacion = validarCodigoRecuperacion(email, code);
+
+  if (!validacion.valido) {
+    return res.json({
+      success: false,
+      msg: validacion.msg,
+    });
+  }
+
+  try {
+    await db.execute({
+      sql: `
+        UPDATE usuarios
+        SET password = ?
+        WHERE id_usuario = ?
+      `,
+      args: [password, validacion.userId],
+    });
+
+    codigosRecuperacion.delete(email);
+
+    res.json({
+      success: true,
+      msg: "La contraseña fue actualizada correctamente",
+    });
+  } catch (error) {
+    console.log("ERROR CONFIRM PASSWORD RESET:", error);
+    res.status(500).json({
+      success: false,
+      msg: "No se pudo actualizar la contraseña",
+    });
   }
 });
 
