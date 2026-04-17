@@ -17,10 +17,17 @@ class _IniciarSesionState extends State<IniciarSesion> {
       'https://escuela-deportiva-project.onrender.com';
 
   bool obscurePassword = true;
+  bool isLoggingIn = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> login(BuildContext context) async {
+    if (isLoggingIn) return;
+
+    setState(() {
+      isLoggingIn = true;
+    });
+
     final url = Uri.parse('$_baseUrl/login');
 
     try {
@@ -55,6 +62,12 @@ class _IniciarSesionState extends State<IniciarSesion> {
       }
     } catch (e) {
       _mostrarMensaje('Error de conexión: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoggingIn = false;
+        });
+      }
     }
   }
 
@@ -670,14 +683,49 @@ class _IniciarSesionState extends State<IniciarSesion> {
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
-                                  onPressed: () => login(context),
-                                  child: const Text(
-                                    'Iniciar Sesión',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                  onPressed: isLoggingIn
+                                      ? null
+                                      : () => login(context),
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: isLoggingIn
+                                        ? const Row(
+                                            key: ValueKey('loading'),
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2.2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(Colors.white),
+                                                    ),
+                                              ),
+                                              SizedBox(width: 12),
+                                              Text(
+                                                'Cargando...',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : const Text(
+                                            'Iniciar Sesión',
+                                            key: ValueKey('label'),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ),

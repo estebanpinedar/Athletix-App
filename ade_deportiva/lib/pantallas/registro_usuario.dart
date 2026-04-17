@@ -15,6 +15,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  bool isRegistering = false;
 
   String? errorPassword;
   String? errorConfirmPassword;
@@ -28,6 +29,8 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
 
   /// 🔥 REGISTRO
   Future<void> registrar() async {
+    if (isRegistering) return;
+
     if (passwordController.text != confirmPasswordController.text) {
       setState(() {
         errorConfirmPassword = "Las contraseñas no coinciden";
@@ -52,6 +55,10 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
       ).showSnackBar(const SnackBar(content: Text("Selecciona un rol")));
       return;
     }
+
+    setState(() {
+      isRegistering = true;
+    });
 
     var url = Uri.parse(
       "https://escuela-deportiva-project.onrender.com/usuarios",
@@ -90,6 +97,12 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isRegistering = false;
+        });
+      }
     }
   }
 
@@ -432,14 +445,52 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                       ),
-                                      onPressed: registrar,
-                                      child: const Text(
-                                        "Registrar",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                      onPressed: isRegistering
+                                          ? null
+                                          : registrar,
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(
+                                          milliseconds: 200,
                                         ),
+                                        child: isRegistering
+                                            ? const Row(
+                                                key: ValueKey('loading'),
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 18,
+                                                    height: 18,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2.2,
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                Color
+                                                              >(Colors.white),
+                                                        ),
+                                                  ),
+                                                  SizedBox(width: 12),
+                                                  Text(
+                                                    "Cargando...",
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : const Text(
+                                                "Registrar",
+                                                key: ValueKey('label'),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                       ),
                                     ),
                                   ),
