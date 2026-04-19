@@ -1,8 +1,10 @@
-﻿import 'dart:convert';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../services/push_notifications_service.dart';
 import 'screens.dart';
 
 class IniciarSesion extends StatefulWidget {
@@ -46,6 +48,22 @@ class _IniciarSesionState extends State<IniciarSesion> {
         final int id = int.parse(data['id'].toString());
         final String nombre = data['nombre'].toString();
         final String rol = data['rol'].toString();
+
+        // Registrar el token de dispositivo para Push Notifications
+        try {
+          final String? token = await PushNotificationsService.getToken();
+          if (token != null) {
+            final String platform = Platform.isIOS ? 'ios' : 'android';
+            await _postJson('usuarios/$id/dispositivo', {
+              'token': token,
+              'plataforma': platform,
+            });
+          }
+        } catch (e) {
+          debugPrint('Error al enviar el token FCM: $e');
+        }
+
+        if (!mounted) return;
 
         Navigator.pushReplacement(
           context,

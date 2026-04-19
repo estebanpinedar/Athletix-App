@@ -4,21 +4,258 @@ import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { db } from "./db.js";
 
+let APP_TIMEZONE = "America/Bogota";
+let firebaseAdminApp = null;
+
+function parsearCredencialesFirebase(valor) {
+  if (!valor) {
+    return null;
+  }
+
+  const texto = String(valor).trim();
+
+  if (!texto) {
+    return null;
+  }
+
+  const candidatos = [
+    texto,
+    texto.replace(/\\n/g, "\n"),
+  ];
+
+  for (const candidato of candidatos) {
+    try {
+      return JSON.parse(candidato);
+    } catch {
+      // Intentamos con el siguiente formato posible.
+    }
+  }
+
+  try {
+    const decodificado = Buffer.from(texto, "base64").toString("utf8");
+    return JSON.parse(decodificado);
+  } catch {
+    return null;
+  }
+}
+
+function obtenerFechaNotificacionUtc() {
+  return new Date().toISOString();
+}
+
+function obtenerFechaLocalZona(fecha = new Date()) {
+  const partes = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(fecha);
+
+  const valor = (tipo) =>
+    partes.find((parte) => parte.type == tipo)?.value ?? "00";
+
+  return `${valor("year")}-${valor("month")}-${valor("day")} ${valor("hour")}:${valor("minute")}:${valor("second")}`;
+}
+
+function normalizarFechaNotificacion(fecha) {
+  if (!fecha) {
+    return null;
+  }
+
+  const texto = String(fecha).trim();
+
+  if (!texto) {
+    return null;
+  }
+
+  const fechaIso = Date.parse(texto);
+  if (!Number.isNaN(fechaIso)) {
+    return {
+      utc: new Date(fechaIso).toISOString(),
+      local: obtenerFechaLocalZona(new Date(fechaIso)),
+    };
+  }
+
+  const textoSqlite = texto.match(
+    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/
+  );
+
+  if (!textoSqlite) {
+    return { utc: texto, local: texto };
+  }
+
+  const [, year, month, day, hour, minute, second = "00"] = textoSqlite;
+  const fechaBogota = `${year}-${month}-${day}T${hour}:${minute}:${second}-05:00`;
+  const ms = Date.parse(fechaBogota);
+
+  if (Number.isNaN(ms)) {
+    return { utc: texto, local: texto };
+  }
+
+  return {
+    utc: new Date(ms).toISOString(),
+    local: obtenerFechaLocalZona(new Date(ms)),
+  };
+}
+
+async function inicializarTablasNotificaciones() {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS device_tokens (
+      id_token INTEGER PRIMARY KEY AUTOINCREMENT,
+      id_usuario INTEGER NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      plataforma TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+}
+
+async function registrarTokenDispositivo(idUsuario, token, plataforma = "android") {
+  const ahora = obtenerFechaNotificacionUtc();
+
+  await db.execute({
+    sql: `
+      INSERT INTO device_tokens (id_usuario, token, plataforma, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(token) DO UPDATE SET
+        id_usuario = excluded.id_usuario,
+        plataforma = excluded.plataforma,
+        updated_at = excluded.updated_at
+    `,
+    args: [idUsuario, token, plataforma, ahora, ahora],
+  });
+}
+
+async function eliminarTokenDispositivo(token) {
+  await db.execute({
+    sql: `DELETE FROM device_tokens WHERE token = ?`,
+    args: [token],
+  });
+}
+
+async function obtenerFirebaseAdminApp() {
+  if (firebaseAdminApp) {
+    return firebaseAdminApp;
+  }
+
+  const serviceAccountJson =
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||
+    process.env.FIREBASE_SERVICE_ACCOUNT;
+
+  if (!serviceAccountJson) {
+    return null;
+  }
+
+  const adminModule = await import("firebase-admin");
+  const admin = adminModule.default ?? adminModule;
+
+  if (admin.apps.length > 0) {
+    firebaseAdminApp = admin.app();
+    return firebaseAdminApp;
+  }
+
+  const credenciales = parsearCredencialesFirebase(serviceAccountJson);
+  if (!credenciales) {
+    console.log(
+      "FIREBASE_SERVICE_ACCOUNT_JSON no tiene un JSON valido ni un base64 valido"
+    );
+    return null;
+  }
+
+  firebaseAdminApp = admin.initializeApp({
+    credential: admin.credential.cert(credenciales),
+  });
+
+  return firebaseAdminApp;
+}
+
+async function enviarPushUsuario(idUsuario, mensaje) {
+  try {
+    const appFirebase = await obtenerFirebaseAdminApp();
+
+    if (!appFirebase) {
+      return;
+    }
+
+    const tokensResult = await db.execute({
+      sql: `SELECT token FROM device_tokens WHERE id_usuario = ?`,
+      args: [idUsuario],
+    });
+
+    const tokens = tokensResult.rows
+      .map((row) => row.token?.toString())
+      .filter(Boolean);
+
+    if (tokens.length === 0) {
+      return;
+    }
+
+    const adminModule = await import("firebase-admin");
+    const admin = adminModule.default ?? adminModule;
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: "Athletix",
+        body: mensaje,
+      },
+      android: {
+        priority: "high",
+        notification: {
+          channelId: "athletix_notifications",
+          sound: "default",
+        },
+      },
+      data: {
+        tipo: "notificacion_general",
+        idUsuario: String(idUsuario),
+        mensaje,
+      },
+    });
+
+    await Promise.all(
+      response.responses.map(async (resultado, index) => {
+        if (resultado.success) {
+          return;
+        }
+
+        const codigo = resultado.error?.code ?? "";
+        if (
+          codigo === "messaging/registration-token-not-registered" ||
+          codigo === "messaging/invalid-registration-token"
+        ) {
+          await eliminarTokenDispositivo(tokens[index]);
+        }
+      })
+    );
+  } catch (error) {
+    console.log("ERROR PUSH NOTIFICACION:", error.message);
+  }
+}
+
 async function crearNotificacion(id_usuario, mensaje) {
   try {
+    const fechaUtc = obtenerFechaNotificacionUtc();
     await db.execute({
       sql: `
         INSERT INTO notificaciones (id_usuario, mensaje, fecha, leida)
-        VALUES (?, ?, datetime('now', 'localtime'), 0)
+        VALUES (?, ?, ?, 0)
       `,
-      args: [id_usuario, mensaje],
+      args: [id_usuario, mensaje, fechaUtc],
     });
+
+    await enviarPushUsuario(id_usuario, mensaje);
   } catch (e) {
     console.log("ERROR CREAR NOTIFICACION:", e);
   }
 }
 
 dotenv.config();
+APP_TIMEZONE = process.env.APP_TIMEZONE || APP_TIMEZONE;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -100,6 +337,29 @@ app.use(express.json());
 app.use((req, res, next) => {
   console.log("REQUEST:", req.method, req.url);
   next();
+});
+
+app.post("/usuarios/:idUsuario/dispositivo", async (req, res) => {
+  const { idUsuario } = req.params;
+  const { token, plataforma } = req.body;
+
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      msg: "El token del dispositivo es obligatorio",
+    });
+  }
+
+  try {
+    await registrarTokenDispositivo(idUsuario, token, plataforma);
+    res.json({ success: true });
+  } catch (error) {
+    console.log("ERROR REGISTRO TOKEN:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 });
 
 
@@ -1216,6 +1476,10 @@ app.get("/equipos/filtrados", async (req, res) => {
   }
 });
 
+inicializarTablasNotificaciones().catch((error) => {
+  console.error("ERROR INICIALIZANDO TABLAS:", error);
+});
+
 //ELIMINAR INSCRIPCION
 app.get("/mis-inscripciones/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
@@ -1347,7 +1611,15 @@ app.get("/notificaciones/:idUsuario", async (req, res) => {
 
     res.json({
       success: true,
-      data: result.rows, // 🔥 IMPORTANTE
+      data: result.rows.map((row) => {
+        const fechaNormalizada = normalizarFechaNotificacion(row.fecha);
+
+        return {
+          ...row,
+          fecha: fechaNormalizada?.utc ?? row.fecha,
+          fecha_local: fechaNormalizada?.local ?? row.fecha,
+        };
+      }),
     });
 
   } catch (error) {

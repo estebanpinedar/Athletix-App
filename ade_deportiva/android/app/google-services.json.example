@@ -1,0 +1,5 @@
+{
+  "_comment": "Descarga tu archivo real desde Firebase Console y guardalo como android/app/google-services.json",
+  "_package_name": "com.example.ade_deportiva",
+  "_warning": "El package_name del archivo real debe coincidir exactamente con applicationId y namespace"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'screens.dart';
 import '../widgets/curved_bottom_nav_bar.dart';
@@ -165,6 +166,67 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
       default:
         return Colors.blue;
     }
+  }
+
+  DateTime? _parseFechaServidor(dynamic raw) {
+    if (raw == null) {
+      return null;
+    }
+
+    final texto = raw.toString().trim();
+    if (texto.isEmpty) {
+      return null;
+    }
+
+    try {
+      return DateTime.parse(texto).toLocal();
+    } catch (_) {}
+
+    final match = RegExp(
+      r'^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$',
+    ).firstMatch(texto);
+
+    if (match == null) {
+      return null;
+    }
+
+    final second = match.group(6) ?? '00';
+    final isoBogota =
+        '${match.group(1)}-${match.group(2)}-${match.group(3)}T${match.group(4)}:${match.group(5)}:$second-05:00';
+
+    try {
+      return DateTime.parse(isoBogota).toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String formatearFechaNotificacion(dynamic fecha, dynamic fechaLocal) {
+    final fechaParseada =
+        _parseFechaServidor(fecha) ?? _parseFechaServidor(fechaLocal);
+
+    if (fechaParseada == null) {
+      return (fechaLocal ?? fecha ?? '').toString();
+    }
+
+    final ahora = DateTime.now();
+    final inicioHoy = DateTime(ahora.year, ahora.month, ahora.day);
+    final inicioFecha = DateTime(
+      fechaParseada.year,
+      fechaParseada.month,
+      fechaParseada.day,
+    );
+    final dias = inicioHoy.difference(inicioFecha).inDays;
+
+    if (dias == 0) {
+      return 'Hoy, ${DateFormat('h:mm a', 'es_CO').format(fechaParseada)}';
+    }
+
+    if (dias == 1) {
+      return 'Ayer, ${DateFormat('h:mm a', 'es_CO').format(fechaParseada)}';
+    }
+
+    return DateFormat("d 'de' MMM, h:mm a", 'es_CO').format(fechaParseada);
   }
 
   @override
@@ -416,7 +478,10 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                n["fecha"] ?? "",
+                                                formatearFechaNotificacion(
+                                                  n["fecha"],
+                                                  n["fecha_local"],
+                                                ),
                                                 style: const TextStyle(
                                                   color: Color(0xFF9FA8C3),
                                                   fontSize: 12,
