@@ -219,14 +219,14 @@ class _NotificacionesUsuarioState extends State<NotificacionesUsuario> {
     final dias = inicioHoy.difference(inicioFecha).inDays;
 
     if (dias == 0) {
-      return 'Hoy, ${DateFormat('h:mm a', 'es_CO').format(fechaParseada)}';
+      return 'Hoy, ${DateFormat('HH:mm', 'es_CO').format(fechaParseada)}';
     }
 
     if (dias == 1) {
-      return 'Ayer, ${DateFormat('h:mm a', 'es_CO').format(fechaParseada)}';
+      return 'Ayer, ${DateFormat('HH:mm', 'es_CO').format(fechaParseada)}';
     }
 
-    return DateFormat("d 'de' MMM, h:mm a", 'es_CO').format(fechaParseada);
+    return DateFormat("d 'de' MMM, HH:mm", 'es_CO').format(fechaParseada);
   }
 
   @override
