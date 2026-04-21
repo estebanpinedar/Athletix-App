@@ -68,11 +68,11 @@ class _PrincipalWidgetState extends State<PrincipalWidget>
                 /// 🎯 ICONO PRINCIPAL
                 Image.asset(
                   "assets/images/logo.png",
-                  height: 120,
+                  height: 100,
                   fit: BoxFit.contain,
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
 
                 /// 🧠 TÍTULO
                 const Padding(

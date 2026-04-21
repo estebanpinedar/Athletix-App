@@ -198,7 +198,9 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                         fillColor: const Color(0xFF1B2340),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFF2E3A5F)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF2E3A5F),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -225,24 +227,20 @@ class _InicioUsuarioState extends State<InicioUsuario> {
 
                     const SizedBox(height: 14),
 
-                    /// TARJETA PRINCIPAL — REGISTRAR / VER ENTRENAMIENTOS
+                    /// TARJETA PRINCIPAL — REGISTRAR / VER EQUIPOS
                     widget.rol == "entrenador"
                         ? _tarjetaPrincipal(
-                            titulo: "Ver Entrenamientos",
-                            subtitulo: "Consulta tus rutinas",
+                            titulo: "Ver Equipos",
+                            subtitulo: "Gestiona tus equipos",
                             gradientColors: [
                               const Color(0xFF2F80ED),
                               const Color(0xFF1E5DBF),
                             ],
-                            icono: Icons.fitness_center,
+                            icono: Icons.emoji_events,
                             onTap: () {
                               navegarRapido(
                                 context,
-                                VerEntrenamientosEntrenador(
-                                  idUsuario: widget.idUsuario,
-                                  nombreCompleto: widget.nombreCompleto,
-                                  rol: widget.rol,
-                                ),
+                                EquiposEntrenador(idUsuario: widget.idUsuario),
                               );
                             },
                           )
@@ -322,23 +320,27 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                         Expanded(
                           child: _tarjetaSecundaria(
                             titulo: widget.rol == "entrenador"
-                                ? "Equipos"
+                                ? "Ver Entrenamientos"
                                 : "Resumen",
                             subtitulo: widget.rol == "entrenador"
-                                ? "Gestiona tus equipos"
+                                ? "Consulta tus rutinas"
                                 : "Ver tus próximas actividades",
                             gradientColors: [
                               const Color(0xFFCE943D),
                               const Color(0xFFA87020),
                             ],
                             icono: widget.rol == "entrenador"
-                                ? Icons.emoji_events
+                                ? Icons.fitness_center
                                 : Icons.bar_chart,
                             onTap: () {
                               if (widget.rol == "entrenador") {
                                 navegarRapido(
                                   context,
-                                  EquiposEntrenador(idUsuario: widget.idUsuario),
+                                  VerEntrenamientosEntrenador(
+                                    idUsuario: widget.idUsuario,
+                                    nombreCompleto: widget.nombreCompleto,
+                                    rol: widget.rol,
+                                  ),
                                 );
                               } else {
                                 navegarRapido(
@@ -492,11 +494,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                 color: Colors.white.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                icono,
-                color: Colors.white,
-                size: 28,
-              ),
+              child: Icon(icono, color: Colors.white, size: 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -514,10 +512,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                   const SizedBox(height: 4),
                   Text(
                     subtitulo,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
               ),
@@ -571,11 +566,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
                 color: Colors.white.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icono,
-                color: Colors.white,
-                size: 22,
-              ),
+              child: Icon(icono, color: Colors.white, size: 22),
             ),
             const Spacer(),
             Text(
@@ -589,10 +580,7 @@ class _InicioUsuarioState extends State<InicioUsuario> {
             const SizedBox(height: 3),
             Text(
               subtitulo,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 11,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
             ),
           ],
         ),

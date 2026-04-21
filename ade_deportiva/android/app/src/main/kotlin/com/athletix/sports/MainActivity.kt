@@ -1,4 +1,4 @@
-package com.example.ade_deportiva
+package com.athletix.sports
 
 import android.graphics.Color
 import android.os.Bundle
