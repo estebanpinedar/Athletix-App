@@ -1,30 +1,41 @@
-# Escuela Deportiva Project
+# 🏋️ Athletix App
 
-Sistema gestor de escuelas deportivas desarrollado en Flutter + Node.js + Turso.
+Aplicación móvil enfocada en la gestión deportiva, diseñada para facilitar la administración de entrenamientos, usuarios y actividades físicas desde una interfaz moderna e intuitiva.
 
-## Notificaciones push
+---
 
-La integración base ya está hecha en app y backend. Para activarlas en un entorno real todavía debes completar estos secretos antes de desplegar:
+## 📱 Descripción
 
-1. Copia tu archivo de Firebase Android en `C:\escuela_deportiva_project\ade_deportiva\android\app\google-services.json`.
-2. Verifica que el `package_name` de ese archivo coincida con `com.example.ade_deportiva` o actualiza `applicationId` y `namespace` en Android para que ambos sean iguales.
-3. En el backend desplegado define `FIREBASE_SERVICE_ACCOUNT_JSON` con el JSON completo de la cuenta de servicio de Firebase Admin.
+**Athletix** es una app desarrollada en Flutter que permite a usuarios y administradores gestionar información relacionada con entrenamientos, rutinas y participación en actividades deportivas.
 
-Hay ejemplos listos en:
+Está pensada como una solución digital para escuelas deportivas, gimnasios o proyectos personales enfocados en el deporte.
 
-- `C:\escuela_deportiva_project\ade_deportiva\android\app\google-services.json.example`
-- `C:\escuela_deportiva_project\escuela_api\.env.example`
+---
 
-## Comandos pendientes en tu máquina
+## 🚀 Características principales
 
-En este entorno no está instalado Flutter/Dart, así que no pude ejecutar estos pasos, pero el proyecto queda listo para correrlos:
+- 👤 Registro e inicio de sesión de usuarios  
+- 📊 Gestión de perfiles  
+- 🏃 Administración de actividades deportivas  
+- 📅 Control de entrenamientos  
+- 🔐 Autenticación segura  
+- 🎨 Interfaz moderna con diseño personalizado  
+- 📱 Compatible con dispositivos Android  
 
-```powershell
-cd C:\escuela_deportiva_project\ade_deportiva
-flutter pub get
+---
 
-cd C:\escuela_deportiva_project\escuela_api
-npm install
-```
+## 🛠️ Tecnologías utilizadas
 
-Después de eso, vuelve a desplegar la app y la API con las credenciales reales de Firebase.
+- **Flutter** – Desarrollo de la interfaz móvil  
+- **Dart** – Lenguaje de programación  
+- **Firebase**
+  - Authentication  
+  - Firestore / Realtime Database  
+- **Material Design** – UI/UX  
+
+---
+
+## 📦 Instalación
+
+Descarga la ultima version disponible en los Releases.
+
